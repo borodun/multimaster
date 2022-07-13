@@ -1,0 +1,11 @@
+# Hosts for multimaster
+
+# 3 servers that will be connected with multimaster
+[mm1]
+node0
+node1
+node2
+
+# Node that will initaiate mm cluster
+[init1]
+node0
