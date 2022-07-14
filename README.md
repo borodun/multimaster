@@ -2,8 +2,9 @@
 Postgres multimaster \
 Deploy modified postgres and configure everything
 ```shell
-ansible-playbook -i hosts site.yml -t update,pkgs,pg,mm,pguser,install
+ansible-playbook site.yml -i hosts  --ask-become-pass -t prepare,build,install
 ```
+BECOME password is password for superuser on hosts
 
 On one node
 ```shell

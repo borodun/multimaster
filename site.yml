@@ -1,15 +1,14 @@
 ---
 # Prepare nodes for postgres and multimaster
 - hosts: mm1
-  pre_tasks:
+  tags: prepare
+  tasks:
   - name: install updates
-    tags: update
     apt:
       upgrade: dist
       update_cache: yes
 
   - name: install packages
-    tags: pkgs
     apt:
       name:
       - flex
@@ -20,76 +19,71 @@
       - clang
       - make
       - cmake
-        
-# Build postgres and multimaster
-- hosts: mm1
-  tasks:
-  - name: clone modified postgres
-    tags: pg
-    git:
-      repo: https://github.com/postgrespro/postgres_cluster.git
-      dest: /postgres_cluster
-      version: rel13_mm_2
-
-  - name: clone multimaster
-    tags: mm
-    git:
-      repo: https://github.com/postgrespro/mmts.git
-      dest: /postgres_cluster/contrib/mmts
-      version: 524f9151d39f478adf5039190f851f655674f950
-
-  - name: compile postgres
-    tags: pg
-    shell: |
-      ./configure
-      make
-      make install
-    args:
-      chdir: /postgres_cluster
-
-  - name: compile multimaster
-    tags: mm
-    shell: make install
-    args:
-      chdir: /postgres_cluster/contrib/mmts
-
-# Configure pg
-- hosts: mm1
-  tasks:
+      - libipc-run-perl
+  
   - name: create postgres user
-    tags: pguser
     user: 
       name: postgres
       shell: /bin/bash
       password: $6$FgLxeneHNpbe5Ugx$kTl14v2KF5NAW/f3cVK78iC4mh/mE.wpowZ/ygZ8PcALbUXQpEcd7asN2FLbn.JlZ5PjJN18TlyWRMMc/fr.F1 # 1234
 
   - name: add postgres to sudoers
-    tags: pguser
     shell: sudo usermod -aG sudo postgres
 
+# Build postgres and multimaster
+- hosts: mm1
+  remote_user: postgres 
+  tasks:
+  - name: clone modified postgres
+    tags: pg
+    git:
+      repo: https://github.com/postgrespro/postgres_cluster.git
+      dest: /home/postgres/postgres_cluster
+      version: rel13_mm_2
+
+  - name: clone multimaster
+    tags: mm
+    git:
+      repo: https://github.com/postgrespro/mmts.git
+      dest: /home/postgres/postgres_cluster/contrib/mmts
+      version: 524f9151d39f478adf5039190f851f655674f950
+
+# We need root priveleges to build pg and mm
+  - name: compile postgres
+    tags: pg,build
+    become: yes
+    shell: |
+      ./configure
+      make
+      make install
+    args:
+      chdir: /home/postgres/postgres_cluster
+
+  - name: compile multimaster
+    tags: mm,build
+    become: yes
+    shell: make install
+    args:
+      chdir: /home/postgres/postgres_cluster/contrib/mmts
+
   - name: create PGDATA
-    tags: pgdata,install
+    tags: pgdata,build
+    become: yes
     shell: | 
       mkdir /usr/local/pgsql/data
       chown postgres /usr/local/pgsql/data
 
   - name: remove PGDATA
     tags: rmpgdata
+    become: yes
     shell: rm -rf /usr/local/pgsql/data
 
-  - name: add hosts
-    tags: hosts
-    shell: |
-      echo -e "10.10.10.221 node0 \n\
-        10.10.10.200 node1 \n\
-        10.10.10.167 node2 \n" | sudo tee -a /etc/hosts
-    args:
-      executable: /bin/bash
+  - name: remove pgsql
+    tags: rmpgsql
+    become: yes
+    shell: rm -rf /usr/local/pgsql
 
 # Configure and control pg
-- hosts: mm1
-  remote_user: postgres
-  tasks:
   - name: init database
     tags: initdb,install
     shell: /usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data
@@ -144,7 +138,7 @@
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
     tags: stop
   
-  - name: start postgres
+  - name: status postgres
     tags: status
     shell: /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data status
     register: out
