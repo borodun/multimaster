@@ -31,13 +31,9 @@ Example output:
           1 | online | {1,2,3}   |       1 | {1,2,3}     | {1,2,3}            | {1,2,3}
 ```
 ```
- id |              conninfo               | is_self | enabled | connected | sender_pid | receiver_pid | n_workers | 
-receiver_mode 
-----+-------------------------------------+---------+---------+-----------+------------+--------------+-----------+-
---------------
+ id |              conninfo               | is_self | enabled | connected | sender_pid | receiver_pid | n_workers | receiver_mode 
+----+-------------------------------------+---------+---------+-----------+------------+--------------+-----------+---------------
   1 | dbname=mydb user=mtmuser host=node3 | t       | t       | t         |            |              |           | 
-  2 | dbname=mydb user=mtmuser host=node4 | f       | t       | t         |      84498 |        84508 |         0 | 
-normal
-  3 | dbname=mydb user=mtmuser host=node5 | f       | t       | t         |      84502 |        84509 |         0 | 
-normal
+  2 | dbname=mydb user=mtmuser host=node4 | f       | t       | t         |      84498 |        84508 |         0 | normal
+  3 | dbname=mydb user=mtmuser host=node5 | f       | t       | t         |      84502 |        84509 |         0 | normal
 ```
