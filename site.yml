@@ -1,14 +1,16 @@
 ---
 # Prepare nodes for postgres and multimaster
-- hosts: mm1
+# Connecting to root
+- name: Update systems and create user
+  hosts: mm1,mm2
   tags: prepare
   tasks:
-  - name: install updates
+  - name: Install updates
     apt:
       upgrade: dist
       update_cache: yes
 
-  - name: install packages
+  - name: Install packages
     apt:
       name:
       - flex
@@ -21,37 +23,46 @@
       - cmake
       - libipc-run-perl
   
-  - name: create postgres user
+  - name: Create postgres user
     user: 
       name: postgres
       shell: /bin/bash
       password: $6$FgLxeneHNpbe5Ugx$kTl14v2KF5NAW/f3cVK78iC4mh/mE.wpowZ/ygZ8PcALbUXQpEcd7asN2FLbn.JlZ5PjJN18TlyWRMMc/fr.F1 # 1234
 
-  - name: add postgres to sudoers
+  - name: Add postgres to sudoers
     shell: sudo usermod -aG sudo postgres
 
+  - name: Copy hosts to nodes
+    copy:
+      src: hosts
+      dest: /etc/hosts
+
+  - name: Update PATH env var
+    shell: |
+      echo "export PATH=$PATH:/usr/local/pgsql/bin" | tee -a /etc/profile
+
 # Build postgres and multimaster
-- hosts: mm1
-  remote_user: postgres 
+- name: Prepare for multimasters
+  hosts: mm1,mm2
+  remote_user: postgres # Connecting to non-root
   tasks:
-  - name: clone modified postgres
-    tags: pg
+  - name: Clone modified postgres
+    tags: pg,build
     git:
       repo: https://github.com/postgrespro/postgres_cluster.git
       dest: /home/postgres/postgres_cluster
       version: rel13_mm_2
 
-  - name: clone multimaster
-    tags: mm
+  - name: Clone multimaster
+    tags: mm,build
     git:
       repo: https://github.com/postgrespro/mmts.git
       dest: /home/postgres/postgres_cluster/contrib/mmts
       version: 524f9151d39f478adf5039190f851f655674f950
 
-# We need root priveleges to build pg and mm
-  - name: compile postgres
+  - name: Compile postgres
     tags: pg,build
-    become: yes
+    become: yes # We need root priveleges to build pg into /usr/local/
     shell: |
       ./configure
       make
@@ -59,32 +70,32 @@
     args:
       chdir: /home/postgres/postgres_cluster
 
-  - name: compile multimaster
+  - name: Compile multimaster
     tags: mm,build
-    become: yes
+    become: yes # Same
     shell: make install
     args:
       chdir: /home/postgres/postgres_cluster/contrib/mmts
 
-  - name: create PGDATA
+  - name: Create PGDATA
     tags: pgdata,build
-    become: yes
+    become: yes # Same
     shell: | 
       mkdir /usr/local/pgsql/data
       chown postgres /usr/local/pgsql/data
 
-  - name: remove PGDATA
+  - name: Remove PGDATA
     tags: rmpgdata
-    become: yes
+    become: yes # Same
     shell: rm -rf /usr/local/pgsql/data
 
-  - name: remove pgsql
+  - name: Remove pgsql
     tags: rmpgsql
-    become: yes
+    become: yes # Same
     shell: rm -rf /usr/local/pgsql
 
 # Configure and control pg
-  - name: init database
+  - name: Init database
     tags: initdb,install
     shell: /usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data
     register: out
@@ -93,7 +104,7 @@
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
     tags: initdb,install
   
-  - name: copy config files
+  - name: Copy config files
     tags: copy,cfg,install
     copy:
       src: "{{ item }}"
@@ -103,7 +114,7 @@
       - pg_hba.conf
       - postgresql.conf
   
-  - name: copy pgpass
+  - name: Copy pgpass
     tags: copy,pgpass,install
     copy:
       src: pgpass
@@ -111,14 +122,13 @@
       owner: postgres
       mode: '0600'
 
-  - name: copy bootstrap.sql
+  - name: Copy bootstrap.sql
     tags: copy,bootstrap,install
     copy:
       src: bootstrap.sql
       dest: /home/postgres/
-      owner: postgres
 
-  - name: start postgres
+  - name: Start postgres
     tags: start,install
     shell: |
       rm logfile
@@ -128,8 +138,17 @@
   - debug: 
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
     tags: start,install
+
+  - name: Bootstrpap db
+    tags: bootstrap,install
+    shell: /usr/local/pgsql/bin/psql -f bootstrap.sql
+    register: out
+
+  - debug: 
+      msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
+    tags: bootstrap,install
   
-  - name: stop postgres
+  - name: Stop postgres
     tags: stop
     shell: /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data stop
     register: out
@@ -138,7 +157,7 @@
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
     tags: stop
   
-  - name: status postgres
+  - name: Status postgres
     tags: status
     shell: /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data status
     register: out
@@ -146,13 +165,22 @@
   - debug: 
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
     tags: status
-
-  - name: bootstrpap db
-    tags: bootstrap,install
-    shell: /usr/local/pgsql/bin/psql -f bootstrap.sql
+  
+# Nodes that will init multimasters
+- name: Init multimaster clusters
+  hosts: init
+  remote_user: postgres
+  tags: clusters
+  tasks:
+  - name: Copy init files
+    copy:
+      src: "{{ mtm_file }}"
+      dest: /home/postgres
     register: out
 
-  - debug: 
-      msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
-    tags: bootstrap,install
+  - name: Init multimaster
+    shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -f {{ mtm_file }}
+    register: out
 
+  - debug:
+       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"

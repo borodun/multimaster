@@ -1,11 +1,19 @@
-# Hosts for multimaster
+# Hosts for multimasters
 
-# 3 servers that will be connected with multimaster
+# Nodes that will be connected with multimasters
 [mm1]
 node0
 node1
 node2
 
-# Node that will initaiate mm cluster
-[init1]
-node0
+[mm2]
+node3
+node4
+node5
+
+# Nodes that will initaiate multimaster clusters
+[init]
+node0 mtm_file=mtm-0.sql
+node3 mtm_file=mtm-1.sql
+
+
