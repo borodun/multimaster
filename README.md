@@ -8,12 +8,12 @@ _BECOME password_ is password for _postgres_ user on hosts (1234) \
 
 Start/stop/status postgres
 ```shel
-ansible-playbook site.yml -i hosts -t start/stop/status
+ansible-playbook site.yml -i hosts -f 6 -t start/stop/status
 ```
 
 Other tags
 ```shel
-ansible-playbook site.yml -i hosts --list-tags
+ansible-playbook site.yml --list-tags
 ```
 
 Check multimasters on node0 and node3:
@@ -23,6 +23,10 @@ psql -U mtmuser -d mydb
 ```sql
 SELECT * FROM mtm.status();
 SELECT * FROM mtm.nodes();
+```
+Or from ansible
+```shell
+ansible-playbook site.yml -i hosts -f 6 -t checkmm
 ```
 Example output:
 ```
