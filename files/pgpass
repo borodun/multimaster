@@ -1,7 +1,1 @@
-node0:5432:mydb:mtmuser:1234
-node1:5432:mydb:mtmuser:1234
-node2:5432:mydb:mtmuser:1234
-
-10.10.10.221:5432:mydb:mtmuser:1234
-10.10.10.200:5432:mydb:mtmuser:1234
-10.10.10.167:5432:mydb:mtmuser:1234
+*:*:mydb:mtmuser:1234

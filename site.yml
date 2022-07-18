@@ -184,3 +184,23 @@
 
   - debug:
        msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
+
+# Check statuses of mm clusters       
+- name: Status multimasters 
+  hosts: init
+  remote_user: postgres
+  tags: checkmm
+  tasks:
+  - name: Check multimasters
+    shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -c "SELECT * FROM mtm.status();"
+    register: out
+
+  - debug:
+       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
+
+  - name: Check nodes
+    shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -c "SELECT * FROM mtm.nodes();"
+    register: out
+
+  - debug:
+       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
