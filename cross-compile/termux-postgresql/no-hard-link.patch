@@ -54,6 +54,22 @@
  {
  	/*
  	 * Ensure that, if we crash directly after the rename/link, a file with
+--- ./src/include/pg_config_manual.h	2022-07-22 12:26:24.317053067 +0000
++++ ./src/include/pg_config_manual.h.mod	2022-07-22 13:19:41.587101872 +0000
+@@ -136,6 +136,13 @@
+ #endif
+ 
+ /*
++ * Define this if your operating system supports link()
++ */
++#if !defined(WIN32) && !defined(__CYGWIN__) && !defined(__ANDROID__)
++#define HAVE_WORKING_LINK 1
++#endif
++
++/*
+  * USE_POSIX_FADVISE controls whether Postgres will attempt to use the
+  * posix_fadvise() kernel call.  Usually the automatic configure tests are
+  * sufficient, but some older Linux distributions had broken versions of
 --- ./src/include/storage/fd.h	2021-05-11 02:11:42.000000000 +0530
 +++ ./src/include/storage/fd.h.mod	2021-06-17 14:13:22.074549249 +0530
 @@ -157,7 +157,7 @@
@@ -64,4 +80,33 @@
 +extern int	durable_link_or_rename(const char *oldfile, const char *newfile, int loglevel);
  extern void SyncDataDirectory(void);
  extern int	data_sync_elevel(int elevel);
+
+--- ./src/backend/storage/file/fd.c	2022-07-22 13:22:47.638003755 +0000
++++ ./src/backend/storage/file/fd.c.mod	2022-07-22 13:38:24.148608678 +0000
+@@ -791,6 +791,7 @@
+ 	if (fsync_fname_ext(oldfile, false, false, elevel) != 0)
+ 		return -1;
+ 
++#if HAVE_WORKING_LINK
+ 	if (link(oldfile, newfile) < 0)
+ 	{
+ 		ereport(elevel,
+@@ -800,6 +801,17 @@
+ 		return -1;
+ 	}
+ 	unlink(oldfile);
++#else
++	/* XXX: Add racy file existence check? */
++	if (rename(oldfile, newfile) < 0)
++	{
++		ereport(elevel,
++				(errcode_for_file_access(),
++				 errmsg("could not rename file \"%s\" to \"%s\": %m",
++						oldfile, newfile)));
++		return -1;
++	}
++#endif
+ 
+ 	/*
+ 	 * Make change persistent in case of an OS crash, both the new entry and
  
