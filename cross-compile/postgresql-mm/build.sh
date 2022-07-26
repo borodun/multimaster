@@ -1,5 +1,5 @@
 TERMUX_PKG_HOMEPAGE=https://www.postgresql.org
-TERMUX_PKG_DESCRIPTION="Object-relational SQL database"
+TERMUX_PKG_DESCRIPTION="Object-relational SQL database with multimaster extension"
 TERMUX_PKG_LICENSE="BSD"
 TERMUX_PKG_LICENSE_FILE="COPYRIGHT"
 TERMUX_PKG_MAINTAINER="@termux"
