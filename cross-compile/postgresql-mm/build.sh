@@ -5,7 +5,7 @@ TERMUX_PKG_LICENSE_FILE="COPYRIGHT"
 TERMUX_PKG_MAINTAINER="@termux"
 TERMUX_PKG_VERSION=13.2
 TERMUX_PKG_REVISION=4
-TERMUX_PKG_SRCURL=https://github.com/borodun/multimaster/raw/main/cross-compile/postgres-with-mm-source-code.tar.bz2
+TERMUX_PKG_SRCURL=http://termux.borodun.works/files/postgres-with-mm-source-code.tar.bz2
 TERMUX_PKG_SHA256=bd206516b72cbf2b6ba6f48ba08e9aef28c8204004fb9b353b5c2bfdfa23a57c
 TERMUX_PKG_DEPENDS="openssl, libcrypt, readline, libandroid-shmem, libuuid, libxml2, libicu, zlib"
 # - pgac_cv_prog_cc_ldflags__Wl___as_needed: Inform that the linker supports as-needed. It's
