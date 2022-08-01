@@ -8,4 +8,5 @@ Run script:
 
 Watch:
 ```shell
-./watch <update_period> <user> <database>```
+./watch <update_period> <user> <database>
+```
