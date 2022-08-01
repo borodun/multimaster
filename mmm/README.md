@@ -3,10 +3,10 @@
 Change hosts in _hosts_ file \
 Run script:
 ```shell
-./monitor <user> <database> 
+./monitor.sh <user> <database> 
 ```
 
 Watch:
 ```shell
-./watch <update_interval> <user> <database>
+./watch.sh <update_interval> <user> <database>
 ```
