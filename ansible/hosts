@@ -12,8 +12,10 @@ node4
 node5
 
 # Nodes that will initaiate multimaster clusters
-[init]
+[init1]
 node0 mtm_file=mtm-0.sql
+
+[init2]
 node3 mtm_file=mtm-1.sql
 
 

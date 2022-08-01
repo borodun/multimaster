@@ -2,7 +2,7 @@
 # Prepare nodes for postgres and multimaster
 # Connecting to root
 - name: Update systems and create user
-  hosts: mm1,mm2
+  hosts: mm1 #,mm2
   tags: prepare
   tasks:
   - name: Install updates
@@ -43,7 +43,7 @@
 
 # Build postgres and multimaster
 - name: Prepare for multimasters
-  hosts: mm1,mm2
+  hosts: mm1 #,mm2
   remote_user: postgres # Connecting to non-root
   tasks:
   - name: Clone modified postgres
@@ -58,7 +58,7 @@
     git:
       repo: https://github.com/postgrespro/mmts.git
       dest: /home/postgres/postgres_cluster/contrib/mmts
-      version: 524f9151d39f478adf5039190f851f655674f950
+      version: PGPRO-6254
 
   - name: Compile postgres
     tags: pg,build
@@ -168,7 +168,7 @@
   
 # Nodes that will init multimasters
 - name: Init multimaster clusters
-  hosts: init
+  hosts: init1 #, init2
   remote_user: postgres
   tags: clusters
   tasks:
@@ -187,7 +187,7 @@
 
 # Check statuses of mm clusters       
 - name: Status multimasters 
-  hosts: init
+  hosts: init1 #, init2
   remote_user: postgres
   tags: checkmm
   tasks:
