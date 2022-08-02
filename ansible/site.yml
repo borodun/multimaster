@@ -77,13 +77,6 @@
     args:
       chdir: /home/postgres/postgres_cluster/contrib/mmts
 
-  - name: Create PGDATA
-    tags: pgdata,build
-    become: yes # Same
-    shell: | 
-      mkdir /usr/local/pgsql/data
-      chown postgres /usr/local/pgsql/data
-
   - name: Remove PGDATA
     tags: rmpgdata
     become: yes # Same
@@ -95,6 +88,13 @@
     shell: rm -rf /usr/local/pgsql
 
 # Configure and control pg
+  - name: Create PGDATA
+    tags: pgdata,install
+    become: yes # Same
+    shell: | 
+      mkdir /usr/local/pgsql/data
+      chown postgres /usr/local/pgsql/data
+
   - name: Init database
     tags: initdb,install
     shell: /usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data
@@ -149,14 +149,19 @@
     tags: bootstrap,install
   
   - name: Stop postgres
-    tags: stop
+    tags: stop,uninstall
     shell: /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data stop
     register: out
 
   - debug: 
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
     tags: stop
-  
+ 
+  - name: Remove PGDATA
+    tags: rmpgdata,uninstall
+    become: yes # Same
+    shell: rm -rf /usr/local/pgsql/data
+
   - name: Status postgres
     tags: status
     shell: /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data status
