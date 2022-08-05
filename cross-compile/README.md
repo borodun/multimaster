@@ -31,7 +31,7 @@ dpkg -i postgresql-mm_13.2-4_aarch64.deb
 You can configre build process by changing _[postgresql-mm/build.sh](postgresql-mm/build.sh)_. See [guide](https://github.com/termux/termux-packages/wiki/Building-packages).
 
 ## Creating your own repository
-Clone _termux-apt-repo_ tool:
+Clone [_termux-apt-repo_](https://github.com/termux/termux-apt-repo) tool:
 ```shell
 git clone https://github.com/termux/termux-apt-repo.git
 ```
