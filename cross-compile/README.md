@@ -1,5 +1,5 @@
 ## Compiling Postgres with multimaster to termux
-Get [termux-packages](https://github.com/termux/termux-packages) repository:
+Get [_termux-packages_](https://github.com/termux/termux-packages) repository:
 ```shell
 git clone https://github.com/termux/termux-packages.git
 ```
@@ -28,7 +28,7 @@ dpkg -i postgresql-mm_13.2-4_aarch64.deb
 ```
 
 ### Configuring 
-You can configre build process by changing _[postgresql-mm/build.sh](postgresql-mm/build.sh)_. See [guide](https://github.com/termux/termux-packages/wiki/Building-packages).
+You can configre build process by changing [_postgresql-mm/build.sh_](postgresql-mm/build.sh). See [_guide_](https://github.com/termux/termux-packages/wiki/Building-packages).
 
 ## Creating your own repository
 Clone [_termux-apt-repo_](https://github.com/termux/termux-apt-repo) tool:
