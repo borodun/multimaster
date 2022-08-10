@@ -77,10 +77,12 @@
     args:
       chdir: /home/postgres/postgres_cluster/contrib/mmts
 
-  - name: Remove PGDATA
-    tags: rmpgdata
+  - name: Compile pg_stat_statements
+    tags: build
     become: yes # Same
-    shell: rm -rf /usr/local/pgsql/data
+    shell: make install
+    args:
+      chdir: /home/postgres/postgres_cluster/contrib/pg_stat_statements
 
   - name: Remove pgsql
     tags: rmpgsql
@@ -125,8 +127,11 @@
   - name: Copy bootstrap.sql
     tags: copy,bootstrap,install
     copy:
-      src: bootstrap.sql
+      src: "{{ item }}"
       dest: /home/postgres/
+      owner: postgres
+    with_items:
+      - bootstrap.sql
 
   - name: Start postgres
     tags: start,install
@@ -188,7 +193,27 @@
     register: out
 
   - debug:
-       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
+      msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
+
+- name: Enable monitoring
+  hosts: init1
+  remote_user: postgres
+  tags: monitoring
+  tasks:
+  - name: Copy monitoring.sql
+    copy:
+      src: "{{ item }}"
+      dest: /home/postgres/
+      owner: postgres
+    with_items:
+      - monitoring.sql
+
+  - name: Add monitoring
+    shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -f monitoring.sql
+    register: out
+
+  - debug:
+      msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
 
 # Check statuses of mm clusters       
 - name: Status multimasters 
@@ -201,11 +226,11 @@
     register: out
 
   - debug:
-       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
+      msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
 
   - name: Check nodes
     shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -c "SELECT * FROM mtm.nodes();"
     register: out
 
   - debug:
-       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
+      msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
