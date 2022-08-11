@@ -9,7 +9,7 @@ func (g *Gauges) HeapBlocksRead() prometheus.Gauge {
 			Help:        "Sum of the number of disk blocks read from all tables",
 			ConstLabels: g.labels,
 		},
-		"SELECT coalesce(sum(heap_blks_read), 0) FROM pg_statio_user_tables",
+		"SELECT COALESCE(sum(heap_blks_read), 0) FROM pg_statio_user_tables",
 	)
 }
 
@@ -20,6 +20,6 @@ func (g *Gauges) HeapBlocksHit() prometheus.Gauge {
 			Help:        "Sum of the number of buffer hits on all tables",
 			ConstLabels: g.labels,
 		},
-		"SELECT coalesce(sum(heap_blks_hit), 0) FROM pg_statio_user_tables",
+		"SELECT COALESCE(sum(heap_blks_hit), 0) FROM pg_statio_user_tables",
 	)
 }

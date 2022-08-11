@@ -15,6 +15,7 @@ func (g *Gauges) Up() prometheus.Gauge {
 			ConstLabels: g.labels,
 		},
 	)
+
 	go func() {
 		for {
 			var up = 1.0
@@ -52,7 +53,6 @@ func (g *Gauges) Latency() prometheus.Gauge {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }
 
@@ -61,7 +61,7 @@ func (g *Gauges) Size() prometheus.Gauge {
 	return g.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_size_bytes",
-			Help:        "Dabatase size in bytes",
+			Help:        "Database size in bytes",
 			ConstLabels: g.labels,
 		},
 		"SELECT pg_database_size(current_database())",

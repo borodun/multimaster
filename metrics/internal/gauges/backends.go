@@ -60,7 +60,7 @@ func (g *Gauges) BackendsByState() *prometheus.GaugeVec {
 	)
 
 	const backendsByStateQuery = `
-		SELECT COUNT(*) AS total, COALESCE (state, 'null') as state
+		SELECT COUNT(*) AS total, COALESCE(state, 'null') as state
 		FROM pg_stat_activity
 		WHERE datname = current_database()
 		GROUP BY state

@@ -24,22 +24,21 @@ func (g *Gauges) ReplicationSlotStatus() *prometheus.GaugeVec {
 		},
 		[]string{"slot_name"},
 	)
+
+	const replicationSlotsQuery = `
+		SELECT
+			slot_name,
+			active::int
+		FROM pg_replication_slots
+		WHERE slot_type = 'logical'
+		  AND "database" = current_database();
+	`
+
 	go func() {
 		for {
 			gauge.Reset()
 			var slots []slots
-			if err := g.query(
-				`
-					SELECT
-						slot_name,
-						active::int
-					FROM pg_replication_slots
-					WHERE slot_type = 'logical'
-					  AND "database" = current_database();
-				`,
-				&slots,
-				emptyParams,
-			); err == nil {
+			if err := g.query(replicationSlotsQuery, &slots, emptyParams); err == nil {
 				for _, slot := range slots {
 					gauge.With(prometheus.Labels{
 						"slot_name": slot.Name,
@@ -62,13 +61,9 @@ func (g *Gauges) ReplicationSlotLagInBytes() *prometheus.GaugeVec {
 		},
 		[]string{"slot_name"},
 	)
-	go func() {
-		for {
-			gauge.Reset()
-			var slots []slots
-			if err := g.query(
-				fmt.Sprintf(
-					`
+
+	var replicationLagQuery = fmt.Sprintf(
+		`
 						SELECT
 							slot_name,
 							%s(%s(), confirmed_flush_lsn) AS total_lag
@@ -76,12 +71,14 @@ func (g *Gauges) ReplicationSlotLagInBytes() *prometheus.GaugeVec {
 						WHERE slot_type = 'logical'
 						AND "database" = current_database();
 					`,
-					postgres.Version(g.version()).WalLsnDiffFunctionName(),
-					postgres.Version(g.version()).CurrentWalLsnFunctionName(),
-				),
-				&slots,
-				emptyParams,
-			); err == nil {
+		postgres.Version(g.version()).WalLsnDiffFunctionName(),
+		postgres.Version(g.version()).CurrentWalLsnFunctionName())
+
+	go func() {
+		for {
+			gauge.Reset()
+			var slots []slots
+			if err := g.query(replicationLagQuery, &slots, emptyParams); err == nil {
 				for _, slot := range slots {
 					gauge.With(prometheus.Labels{
 						"slot_name": slot.Name,

@@ -23,7 +23,7 @@ func (g *Gauges) TableDeadRows() *prometheus.GaugeVec {
 	)
 
 	const tableDeadRowsQuery = `
-		SELECT relname, coalesce(n_dead_tup, 0) as n_dead_tup FROM pg_stat_user_tables
+		SELECT relname, COALESCE(n_dead_tup, 0) as n_dead_tup FROM pg_stat_user_tables
 	`
 
 	go func() {
@@ -50,7 +50,7 @@ func (g *Gauges) DatabaseDeadRows() prometheus.Gauge {
 			Help:        "Estimated number of dead rows in a database",
 			ConstLabels: g.labels,
 		},
-		"SELECT coalesce(sum(n_dead_tup), 0) as n_dead_tup FROM pg_stat_user_tables",
+		"SELECT COALESCE(sum(n_dead_tup), 0) as n_dead_tup FROM pg_stat_user_tables",
 	)
 }
 
@@ -71,7 +71,7 @@ func (g *Gauges) TableLiveRows() *prometheus.GaugeVec {
 	)
 
 	const tableLiveRowsQuery = `
-		SELECT relname, coalesce(n_live_tup, 0) as n_live_tup FROM pg_stat_user_tables
+		SELECT relname, COALESCE(n_live_tup, 0) as n_live_tup FROM pg_stat_user_tables
 	`
 
 	go func() {
@@ -98,6 +98,6 @@ func (g *Gauges) DatabaseLiveRows() prometheus.Gauge {
 			Help:        "Estimated number of live rows in a database",
 			ConstLabels: g.labels,
 		},
-		"SELECT coalesce(sum(n_live_tup), 0) as n_live_tup FROM pg_stat_user_tables",
+		"SELECT COALESCE(sum(n_live_tup), 0) as n_live_tup FROM pg_stat_user_tables",
 	)
 }

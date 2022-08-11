@@ -39,7 +39,6 @@ func (g *Gauges) IndexScans() *prometheus.GaugeVec {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }
 
@@ -48,7 +47,7 @@ func (g *Gauges) UnusedIndexes() prometheus.Gauge {
 	return g.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_unused_indexes",
-			Help:        "Dabatase unused indexes count",
+			Help:        "Database unused indexes count",
 			ConstLabels: g.labels,
 		},
 		`
@@ -80,7 +79,7 @@ func (g *Gauges) IndexBlocksReadBySchema() *prometheus.GaugeVec {
 	const schemaIndexBlocksReadQuery = `
 		SELECT
 			schemaname,
-			coalesce(sum(idx_blks_read), 0) AS idx_blks_read
+			COALESCE(sum(idx_blks_read), 0) AS idx_blks_read
 		FROM pg_statio_user_indexes
 		WHERE schemaname NOT IN ('pg_catalog','information_schema','monitoring')
 		GROUP BY schemaname;
@@ -99,7 +98,6 @@ func (g *Gauges) IndexBlocksReadBySchema() *prometheus.GaugeVec {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }
 
@@ -122,7 +120,7 @@ func (g *Gauges) IndexBlocksHitBySchema() *prometheus.GaugeVec {
 	const schemaIndexBlocksHitQuery = `
 		SELECT
 			schemaname,
-			coalesce(sum(idx_blks_hit), 0) AS idx_blks_hit
+			COALESCE(sum(idx_blks_hit), 0) AS idx_blks_hit
 		FROM pg_statio_user_indexes
 		WHERE schemaname NOT IN ('pg_catalog','information_schema','monitoring')
 		GROUP BY schemaname;
@@ -141,7 +139,6 @@ func (g *Gauges) IndexBlocksHitBySchema() *prometheus.GaugeVec {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }
 
@@ -263,6 +260,7 @@ func (g *Gauges) IndexBloat() *prometheus.GaugeVec {
 		},
 		[]string{"index", "table"},
 	)
+
 	go func() {
 		for {
 			gauge.Reset()

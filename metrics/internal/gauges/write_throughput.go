@@ -6,14 +6,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var databaseWritingUsageQuery = `
-	SELECT coalesce(tup_inserted, 0) as tup_inserted
-		 , coalesce(tup_updated, 0) as tup_updated
-		 , coalesce(tup_deleted, 0) as tup_deleted
-	  FROM pg_stat_database 
-	 WHERE datname = current_database()
-`
-
 type writingUsage struct {
 	TuplesInserted float64 `db:"tup_inserted"`
 	TuplesUpdated  float64 `db:"tup_updated"`
@@ -29,6 +21,15 @@ func (g *Gauges) DatabaseWritingUsage() *prometheus.GaugeVec {
 		},
 		[]string{"stat"},
 	)
+
+	const databaseWritingUsageQuery = `
+		SELECT COALESCE(tup_inserted, 0) as tup_inserted, 
+			COALESCE(tup_updated, 0) as tup_updated,
+			COALESCE(tup_deleted, 0) as tup_deleted
+		  FROM pg_stat_database 
+			WHERE datname = current_database()
+	`
+
 	go func() {
 		for {
 			var writingUsage []writingUsage

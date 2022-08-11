@@ -76,7 +76,6 @@ func watch(db *sql.DB, reg prometheus.Registerer, conName, dbName string, interv
 	reg.MustRegister(postgresGauges.ScheduledCheckpoints())
 	reg.MustRegister(postgresGauges.BuffersMaxWrittenClean())
 	reg.MustRegister(postgresGauges.BuffersWritten())
-	reg.MustRegister(postgresGauges.DeadTuples())
 	reg.MustRegister(postgresGauges.HeapBlocksHit())
 	reg.MustRegister(postgresGauges.HeapBlocksRead())
 	reg.MustRegister(postgresGauges.IndexScans())
@@ -91,7 +90,6 @@ func watch(db *sql.DB, reg prometheus.Registerer, conName, dbName string, interv
 	reg.MustRegister(postgresGauges.ReplicationDelayInBytes())
 	reg.MustRegister(postgresGauges.ReplicationStatus())
 	reg.MustRegister(postgresGauges.Size())
-	reg.MustRegister(postgresGauges.SlowestQueries())
 	reg.MustRegister(postgresGauges.StreamingWALs())
 	reg.MustRegister(postgresGauges.TableBloat())
 	reg.MustRegister(postgresGauges.TableUsage())
@@ -115,12 +113,14 @@ func watch(db *sql.DB, reg prometheus.Registerer, conName, dbName string, interv
 	reg.MustRegister(postgresGauges.ReplicationSlotStatus())
 	reg.MustRegister(postgresGauges.ReplicationSlotLagInBytes())
 
+	reg.MustRegister(postgresGauges.SlowestQueries())
+	reg.MustRegister(postgresGauges.DeadTuples())
+
 	reg.MustRegister(postgresGauges.Latency())
 	reg.MustRegister(postgresGauges.TransactionsCommitSum())
 	reg.MustRegister(postgresGauges.TransactionsRollbackSum())
 	reg.MustRegister(postgresGauges.QueriesSum())
 
-	postgresGauges.CheckMtm()
 	reg.MustRegister(postgresGauges.MtmStatus())
 	reg.MustRegister(postgresGauges.MtmGenNum())
 }

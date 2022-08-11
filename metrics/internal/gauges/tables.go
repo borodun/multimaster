@@ -77,7 +77,7 @@ WITH constants AS (
 	SELECT schemaname, tablename,
 		TRUE as can_estimate,
 		est_rows,
-		table_bytes + ( coalesce(toast.relpages, 0) * bs ) as table_bytes,
+		table_bytes + ( COALESCE(toast.relpages, 0) * bs ) as table_bytes,
 		expected_bytes + ( ceil( coalesce(toast.reltuples, 0) / 4 ) * bs ) as expected_bytes
 	FROM table_estimates LEFT OUTER JOIN pg_class as toast
 	ON table_estimates.reltoastrelid = toast.oid
@@ -141,6 +141,7 @@ func (g *Gauges) TableBloat() *prometheus.GaugeVec {
 		},
 		[]string{"table"},
 	)
+
 	go func() {
 		for {
 			gauge.Reset()
@@ -157,17 +158,6 @@ func (g *Gauges) TableBloat() *prometheus.GaugeVec {
 	}()
 	return gauge
 }
-
-var tableUsageQuery = `
-	SELECT  s.relname,
-			coalesce(s.seq_tup_read, 0) as seq_tup_read,
-			coalesce(s.idx_tup_fetch, 0) as idx_tup_fetch,
-			coalesce(s.n_tup_ins, 0) as n_tup_ins,
-			coalesce(s.n_tup_upd, 0) as n_tup_upd,
-			coalesce(s.n_tup_del, 0) as n_tup_del
-	FROM pg_stat_user_tables s
-	ORDER BY 2 desc
-`
 
 type tableUsage struct {
 	Name      string  `db:"relname"`
@@ -187,6 +177,18 @@ func (g *Gauges) TableUsage() *prometheus.GaugeVec {
 		},
 		[]string{"table", "stat"},
 	)
+
+	var tableUsageQuery = `
+		SELECT  s.relname,
+				COALESCE(s.seq_tup_read, 0) as seq_tup_read,
+				COALESCE(s.idx_tup_fetch, 0) as idx_tup_fetch,
+				COALESCE(s.n_tup_ins, 0) as n_tup_ins,
+				COALESCE(s.n_tup_upd, 0) as n_tup_upd,
+				COALESCE(s.n_tup_del, 0) as n_tup_del
+		FROM pg_stat_user_tables s
+		ORDER BY 2 desc
+	`
+
 	go func() {
 		for {
 			var tables []tableUsage
@@ -220,13 +222,6 @@ func (g *Gauges) TableUsage() *prometheus.GaugeVec {
 	return gauge
 }
 
-var tableSecScansQuery = `
-	select relname, 
-		coalesce(seq_scan, 0) as seq_scan, 
-		coalesce(idx_scan, 0) as idx_scan
-	from pg_stat_user_tables
-`
-
 type tableScans struct {
 	Name    string  `db:"relname"`
 	SecScan float64 `db:"seq_scan"`
@@ -237,11 +232,19 @@ func (g *Gauges) TableScans() *prometheus.GaugeVec {
 	var gauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_table_scans",
-			Help:        "table scans statistics",
+			Help:        "Table scans statistics",
 			ConstLabels: g.labels,
 		},
 		[]string{"table", "scan"},
 	)
+
+	const tableSecScansQuery = `
+		SELECT relname, 
+			COALESCE(seq_scan, 0) AS seq_scan, 
+			COALESCE(idx_scan, 0) AS idx_scan
+		FROM pg_stat_user_tables
+	`
+
 	go func() {
 		for {
 			var tables []tableScans
@@ -260,15 +263,8 @@ func (g *Gauges) TableScans() *prometheus.GaugeVec {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }
-
-var hotUpdatesQuery = `
-SELECT relname
-	 , coalesce(n_tup_hot_upd, 0) as n_tup_hot_upd
-  FROM pg_stat_user_tables
-`
 
 type tableHotUpdates struct {
 	Name       string  `db:"relname"`
@@ -284,6 +280,12 @@ func (g *Gauges) HOTUpdates() *prometheus.GaugeVec {
 		},
 		[]string{"table"},
 	)
+
+	const hotUpdatesQuery = `
+		SELECT relname, COALESCE(n_tup_hot_upd, 0) as n_tup_hot_upd
+		FROM pg_stat_user_tables
+	`
+
 	go func() {
 		for {
 			var tables []tableHotUpdates
@@ -297,6 +299,5 @@ func (g *Gauges) HOTUpdates() *prometheus.GaugeVec {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }

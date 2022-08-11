@@ -7,6 +7,20 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+func (g *Gauges) checkPgStatTuple() {
+	if !g.hasExtension("pgstattuple") {
+		log.WithField("db", g.name).
+			Warn("postgresql_dead_tuples_pct disabled because pgstattuple extension is not installed")
+		return
+	}
+	if !g.hasPermissionToExecutePgStatTuple() {
+		log.WithField("db", g.name).
+			Warn("postgresql_dead_tuples_pct disabled because user doesn't have permission to use pgstattuple functions")
+		return
+	}
+	g.pgstattuple = true
+}
+
 type relation struct {
 	Name string `db:"relname"`
 }
@@ -19,14 +33,7 @@ func (g *Gauges) DeadTuples() *prometheus.GaugeVec {
 		ConstLabels: g.labels,
 	}, []string{"table"})
 
-	if !g.hasExtension("pgstattuple") {
-		log.WithField("db", g.name).
-			Warn("postgresql_dead_tuples_pct disabled because pgstattuple extension is not installed")
-		return gauge
-	}
-	if !g.hasPermissionToExecutePgStatTuple() {
-		log.WithField("db", g.name).
-			Warn("postgresql_dead_tuples_pct disabled because user doesn't have permission to use pgstattuple functions")
+	if !g.pgstattuple {
 		return gauge
 	}
 
@@ -52,7 +59,6 @@ func (g *Gauges) DeadTuples() *prometheus.GaugeVec {
 			time.Sleep(12 * time.Hour)
 		}
 	}()
-
 	return gauge
 }
 

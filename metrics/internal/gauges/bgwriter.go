@@ -49,14 +49,6 @@ type buffersWritten struct {
 	Backend    float64 `db:"buffers_backend"`
 }
 
-var buffersWrittenQuery = `
-	SELECT
-	  buffers_checkpoint,
-	  buffers_clean,
-	  buffers_backend
-	FROM pg_stat_bgwriter
-`
-
 // BuffersWritten returns the number of buffers written directly by a backend,
 // by the background writer and during checkpoints
 func (g *Gauges) BuffersWritten() *prometheus.GaugeVec {
@@ -68,6 +60,14 @@ func (g *Gauges) BuffersWritten() *prometheus.GaugeVec {
 		},
 		[]string{"written_by"},
 	)
+
+	const buffersWrittenQuery = `
+		SELECT
+		  buffers_checkpoint,
+		  buffers_clean,
+		  buffers_backend
+		FROM pg_stat_bgwriter
+	`
 
 	go func() {
 		for {
@@ -88,6 +88,5 @@ func (g *Gauges) BuffersWritten() *prometheus.GaugeVec {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }

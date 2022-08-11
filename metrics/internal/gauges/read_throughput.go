@@ -6,15 +6,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var databaseReadingUsageQuery = `
-	SELECT coalesce(tup_returned, 0) as tup_returned
-		 , coalesce(tup_fetched, 0) as tup_fetched
-	  FROM pg_stat_database 
-	 WHERE datname = current_database()
-`
-
 type readingUsage struct {
-	TuplesRedurned float64 `db:"tup_returned"`
+	TuplesReturned float64 `db:"tup_returned"`
 	TuplesFetched  float64 `db:"tup_fetched"`
 }
 
@@ -27,6 +20,14 @@ func (g *Gauges) DatabaseReadingUsage() *prometheus.GaugeVec {
 		},
 		[]string{"stat"},
 	)
+
+	const databaseReadingUsageQuery = `
+		SELECT COALESCE(tup_returned, 0) as tup_returned, 
+			COALESCE(tup_fetched, 0) as tup_fetched
+		  FROM pg_stat_database 
+		 WHERE datname = current_database()
+	`
+
 	go func() {
 		for {
 			var readingUsage []readingUsage
@@ -37,7 +38,7 @@ func (g *Gauges) DatabaseReadingUsage() *prometheus.GaugeVec {
 					}).Set(database.TuplesFetched)
 					gauge.With(prometheus.Labels{
 						"stat": "tup_returned",
-					}).Set(database.TuplesRedurned)
+					}).Set(database.TuplesReturned)
 				}
 			}
 			time.Sleep(g.interval)

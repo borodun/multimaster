@@ -7,11 +7,18 @@ import (
 	"time"
 )
 
-func (g *Gauges) CheckMtm() {
+func (g *Gauges) checkMtm() {
 	if !g.hasExtension("multimaster") {
 		log.WithField("db", g.name).
 			Warn("mtm monitoring is disabled because multimaster extension is not installed")
+		return
 	}
+	if !g.hasSharedPreloadLibrary("multimaster") {
+		log.WithField("db", g.name).
+			Warn("mtm monitoring is disabled because multimaster is not on shared_preload_libraries")
+		return
+	}
+	g.mmts = true
 }
 
 type status struct {
@@ -25,6 +32,10 @@ func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
 		Help:        "Node status in mtm cluster",
 		ConstLabels: g.labels,
 	}, []string{"status"})
+
+	if !g.mmts {
+		return gauge
+	}
 
 	const mtmNodeStatusQuery = `
 		SELECT status FROM mtm.status()
@@ -65,9 +76,26 @@ func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
 
 // MtmGenNum returns generation of a node in mtm cluster
 func (g *Gauges) MtmGenNum() prometheus.Gauge {
-	return g.new(prometheus.GaugeOpts{
+	var gauge = prometheus.NewGauge(prometheus.GaugeOpts{
 		Name:        "mtm_gen_num",
 		Help:        "Node generation in mtm cluster",
 		ConstLabels: g.labels,
-	}, "SELECT gen_num FROM mtm.status()")
+	})
+
+	if !g.mmts {
+		return gauge
+	}
+
+	const genNumQuery = `SELECT gen_num FROM mtm.status()`
+
+	go func() {
+		for {
+			var genNum []float64
+			if err := g.query(genNumQuery, &genNum, emptyParams); err == nil {
+				gauge.Set(genNum[0])
+			}
+			time.Sleep(g.interval)
+		}
+	}()
+	return gauge
 }

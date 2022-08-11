@@ -7,7 +7,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// ReplicationStatus returns a prometheus gauge for the PostgreSQL
+// ReplicationStatus returns a prometheus gauge for the PostgresSQL
 // replication status
 func (g *Gauges) ReplicationStatus() prometheus.Gauge {
 	return g.new(
@@ -57,7 +57,7 @@ func (g *Gauges) ReplicationDelayInSeconds() prometheus.Gauge {
 	return g.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_replication_delay_seconds",
-			Help:        "Dabatase replication delay in seconds",
+			Help:        "Database replication delay in seconds",
 			ConstLabels: g.labels,
 		},
 		`
@@ -77,7 +77,7 @@ func (g *Gauges) ReplicationDelayInBytes() prometheus.Gauge {
 	return g.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_replication_delay_bytes",
-			Help:        "Dabatase replication delay in bytes",
+			Help:        "Database replication delay in bytes",
 			ConstLabels: g.labels,
 		},
 		fmt.Sprintf(`

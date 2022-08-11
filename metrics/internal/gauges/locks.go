@@ -12,33 +12,32 @@ type locks struct {
 	Count float64 `db:"count"`
 }
 
-// Locks returns the number of active locks on the database by locktype and mode
+// Locks returns the number of active locks on the database by lock type and mode
 func (g *Gauges) Locks() *prometheus.GaugeVec {
 	var gauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_locks",
-			Help:        "Number of active locks on the database by locktype and mode",
+			Help:        "Number of active locks on the database by lock type and mode",
 			ConstLabels: g.labels,
 		},
 		[]string{"locktype", "mode"},
 	)
+
+	const locksQuery = `
+		SELECT locktype, mode, count(*) as count
+		FROM pg_locks
+		WHERE database = (
+			SELECT datid
+			FROM pg_stat_database
+			WHERE datname = current_database()
+		) GROUP BY locktype, mode
+	`
+
 	go func() {
 		for {
 			gauge.Reset()
 			var locks []locks
-			if err := g.query(
-				`
-					SELECT locktype, mode, count(*) as count
-					FROM pg_locks
-					WHERE database = (
-						SELECT datid
-						FROM pg_stat_database
-						WHERE datname = current_database()
-					) GROUP BY locktype, mode;
-				`,
-				&locks,
-				emptyParams,
-			); err == nil {
+			if err := g.query(locksQuery, &locks, emptyParams); err == nil {
 				for _, lock := range locks {
 					gauge.With(prometheus.Labels{
 						"locktype": lock.Type,
@@ -68,7 +67,7 @@ func (g *Gauges) NotGrantedLocks() prometheus.Gauge {
 				SELECT datid
 				FROM pg_stat_database
 				WHERE datname = current_database()
-			);
+			)
 		`,
 	)
 }

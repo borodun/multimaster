@@ -38,9 +38,7 @@ func (g *Gauges) LastTimeVacuumRan() *prometheus.GaugeVec {
 	)
 
 	const lastVacuumQuery = `
-		SELECT
-		  relname,
-		  COALESCE(EXTRACT(EPOCH FROM last_vacuum), 0) as last_vacuum_time
+		SELECT relname, COALESCE(EXTRACT(EPOCH FROM last_vacuum), 0) as last_vacuum_time
 		FROM pg_stat_user_tables
 	`
 
@@ -57,7 +55,6 @@ func (g *Gauges) LastTimeVacuumRan() *prometheus.GaugeVec {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }
 
@@ -74,9 +71,7 @@ func (g *Gauges) LastTimeAutoVacuumRan() *prometheus.GaugeVec {
 	)
 
 	const lastAutoVacuumQuery = `
-		SELECT
-		  relname,
-		  COALESCE(EXTRACT(EPOCH FROM last_autovacuum), 0) as last_vacuum_time
+		SELECT relname, COALESCE(EXTRACT(EPOCH FROM last_autovacuum), 0) as last_vacuum_time
 		FROM pg_stat_user_tables
 	`
 
@@ -93,7 +88,6 @@ func (g *Gauges) LastTimeAutoVacuumRan() *prometheus.GaugeVec {
 			time.Sleep(g.interval)
 		}
 	}()
-
 	return gauge
 }
 
