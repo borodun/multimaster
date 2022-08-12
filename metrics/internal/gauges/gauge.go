@@ -24,11 +24,7 @@ type Gauges struct {
 	pgstattuple      bool
 }
 
-func New(db *sql.DB, conName, dbName string, interval, timeout time.Duration) *Gauges {
-	var labels = prometheus.Labels{
-		"connection_name": conName,
-		"database_name":   dbName,
-	}
+func New(db *sql.DB, conName string, interval, timeout time.Duration, labels map[string]string) *Gauges {
 	var dbx = sqlx.NewDb(db, "postgres")
 	gauges := &Gauges{
 		name:     conName,
@@ -47,11 +43,16 @@ func New(db *sql.DB, conName, dbName string, interval, timeout time.Duration) *G
 		pgStatStatements: false,
 		pgstattuple:      false,
 	}
-	gauges.checkMtm()
-	gauges.checkPgStatStatements()
-	gauges.checkPgStatTuple()
+
+	gauges.checkExtensions()
 
 	return gauges
+}
+
+func (g *Gauges) checkExtensions() {
+	g.checkMtm()
+	g.checkPgStatStatements()
+	g.checkPgStatTuple()
 }
 
 func (g *Gauges) hasSharedPreloadLibrary(lib string) bool {
@@ -121,7 +122,7 @@ func (g *Gauges) observe(gauge prometheus.Gauge, query string, params []interfac
 	}
 }
 
-var emptyParams = []interface{}{}
+var emptyParams []interface{}
 
 func (g *Gauges) query(
 	query string,

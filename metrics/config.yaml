@@ -6,6 +6,9 @@ spec:
   databases:
     - name: node0
       url: postgresql://user:1234@node0:5432/mydb?sslmode=disable
+      # Will override common labels
+      labels:
+        dc: east
 
   # Port that server will listen on for incoming connections
   # Default: 8080
@@ -23,3 +26,6 @@ spec:
   # Default: 5
   connectionPoolMaxSize: 5
 
+  # Common labels
+  labels:
+    dc: west

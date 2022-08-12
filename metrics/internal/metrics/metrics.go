@@ -2,18 +2,18 @@ package metrics
 
 import (
 	"database/sql"
-	"github.com/lib/pq"
 	"metrics/internal/config"
 	"metrics/internal/gauges"
 	"net/http"
+	nurl "net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
+	"github.com/tg/pgpass"
 )
 
 func Run(cfg config.Config) {
@@ -24,22 +24,32 @@ func Run(cfg config.Config) {
 	http.Handle("/metrics", promhttp.Handler())
 
 	for _, con := range cfg.Spec.Databases {
-		var dblog = log.WithField("db", con.Name)
+		var dbLog = log.WithField("db", con.Name)
 
-		db, err := sql.Open("postgres", con.URL)
+		url, err := pgpass.UpdateURL(con.URL)
 		if err != nil {
-			dblog.WithError(err).Fatal("failed to open url")
+			dbLog.WithError(err).Error("failed to add password from ~/.pgpass")
+		}
+		if !checkPass(url) {
+			dbLog.Error("no password provided for user")
+		}
+
+		db, err := sql.Open("postgres", url)
+		if err != nil {
+			dbLog.WithError(err).Warn("failed to open url, disabling database from monitoring")
+			continue
 		}
 		defer db.Close()
 
 		if err = db.Ping(); err != nil {
-			dblog.WithError(err).Warn("failed to ping database")
+			dbLog.WithError(err).Warn("failed to ping database")
 		}
 		db.SetMaxOpenConns(cfg.Spec.ConnectionPoolMaxSize)
 
-		dbName := getDbName(con.URL, con.Name)
-		watch(db, prometheus.DefaultRegisterer, con.Name, dbName, cfg.Spec.Interval, cfg.Spec.QueryTimeout)
-		dblog.Info("started monitoring")
+		labels := mergeLabels(cfg.Spec.Labels, con.Labels, map[string]string{"connection_name": con.Name})
+
+		watch(db, prometheus.DefaultRegisterer, con.Name, cfg.Spec.Interval, cfg.Spec.QueryTimeout, labels)
+		dbLog.Info("started monitoring")
 	}
 
 	log.WithField("port", strconv.Itoa(cfg.Spec.ListenPort)).Info("server started")
@@ -48,22 +58,33 @@ func Run(cfg config.Config) {
 	}
 }
 
-func getDbName(url, name string) string {
-	pgUrl, _ := pq.ParseURL(url)
-	params := strings.Split(pgUrl, " ")
-	for _, param := range params {
-		if strings.Contains(param, "dbname") {
-			dbName := strings.Split(param, "=")[1]
-			dbName = strings.Trim(dbName, "'")
-			return dbName
+func mergeLabels(labelsToMerge ...map[string]string) map[string]string {
+	labels := map[string]string{}
+
+	for i := range labelsToMerge {
+		for k, v := range labelsToMerge[i] {
+			labels[k] = v
 		}
 	}
-	log.WithField("db", name).Warn("couldn't parse db name from url")
-	return "null"
+
+	return labels
 }
 
-func watch(db *sql.DB, reg prometheus.Registerer, conName, dbName string, interval, timeout int) {
-	var postgresGauges = gauges.New(db, conName, dbName, time.Duration(interval)*time.Second, time.Duration(timeout)*time.Second)
+func checkPass(url string) bool {
+	u, err := nurl.Parse(url)
+	if err != nil {
+		return false
+	}
+	if user := u.User; user != nil {
+		if _, ok := user.Password(); !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func watch(db *sql.DB, reg prometheus.Registerer, conName string, interval, timeout int, labels map[string]string) {
+	var postgresGauges = gauges.New(db, conName, time.Duration(interval)*time.Second, time.Duration(timeout)*time.Second, labels)
 	reg.MustRegister(postgresGauges.Errs)
 
 	reg.MustRegister(postgresGauges.ConnectedBackends())
