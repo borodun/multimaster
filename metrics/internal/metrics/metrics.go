@@ -18,12 +18,12 @@ import (
 
 func Run(cfg config.Config) {
 	var server = &http.Server{
-		Addr: ":" + strconv.Itoa(cfg.Spec.ListenPort),
+		Addr: ":" + strconv.Itoa(cfg.Metrics.ListenPort),
 	}
 
 	http.Handle("/metrics", promhttp.Handler())
 
-	for _, con := range cfg.Spec.Databases {
+	for _, con := range cfg.Metrics.Databases {
 		var dbLog = log.WithField("db", con.Name)
 
 		url, err := pgpass.UpdateURL(con.URL)
@@ -44,15 +44,15 @@ func Run(cfg config.Config) {
 		if err = db.Ping(); err != nil {
 			dbLog.WithError(err).Warn("failed to ping database")
 		}
-		db.SetMaxOpenConns(cfg.Spec.ConnectionPoolMaxSize)
+		db.SetMaxOpenConns(cfg.Metrics.ConnectionPoolMaxSize)
 
-		labels := mergeLabels(cfg.Spec.Labels, con.Labels, map[string]string{"connection_name": con.Name})
+		labels := mergeLabels(cfg.Metrics.Labels, con.Labels, map[string]string{"connection_name": con.Name})
 
-		watch(db, prometheus.DefaultRegisterer, con.Name, cfg.Spec.Interval, cfg.Spec.QueryTimeout, labels)
+		watch(db, prometheus.DefaultRegisterer, con.Name, cfg.Metrics.Interval, cfg.Metrics.QueryTimeout, labels)
 		dbLog.Info("started monitoring")
 	}
 
-	log.WithField("port", strconv.Itoa(cfg.Spec.ListenPort)).Info("server started")
+	log.WithField("port", strconv.Itoa(cfg.Metrics.ListenPort)).Info("server started")
 	if err := server.ListenAndServe(); err != nil {
 		log.WithError(err).Fatal("failed to start server")
 	}

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (g *Gauges) checkMtm() {
+func (g *Gauges) checkMultimaster() {
 	if !g.hasExtension("multimaster") {
 		log.WithField("db", g.name).
 			Warn("mtm monitoring is disabled because multimaster extension is not installed")

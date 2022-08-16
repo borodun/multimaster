@@ -50,7 +50,7 @@ func New(db *sql.DB, conName string, interval, timeout time.Duration, labels map
 }
 
 func (g *Gauges) checkExtensions() {
-	g.checkMtm()
+	g.checkMultimaster()
 	g.checkPgStatStatements()
 	g.checkPgStatTuple()
 }

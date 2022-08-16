@@ -16,7 +16,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:   "mmts-metrics [--config config.yaml]",
-		Short: "Metrics server for Postgres Multimaster ",
+		Short: "Metrics server for Postgres multimaster ",
 		Run: func(cmd *cobra.Command, args []string) {
 			metrics.Run(cfg)
 		},
@@ -30,7 +30,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "config file (default is ./config.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to config file (default is ./config.yaml)")
 }
 
 func initConfig() {
@@ -42,10 +42,10 @@ func initConfig() {
 		viper.SetConfigName("config")
 	}
 
-	viper.SetDefault("spec.listenPort", 8080)
-	viper.SetDefault("spec.interval", 10)
-	viper.SetDefault("spec.queryTimeout", 5)
-	viper.SetDefault("spec.connectionPoolMaxSize", 5)
+	viper.SetDefault("metrics.listenPort", 8080)
+	viper.SetDefault("metrics.interval", 10)
+	viper.SetDefault("metrics.queryTimeout", 5)
+	viper.SetDefault("metrics.connectionPoolMaxSize", 5)
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
@@ -63,7 +63,7 @@ func initConfig() {
 
 func validate() error {
 	names := make(map[string]bool)
-	for _, conf := range cfg.Spec.Databases {
+	for _, conf := range cfg.Metrics.Databases {
 		if conf.Name == "" {
 			return fmt.Errorf("failed to validate configuration. Database name cannot be empty")
 		}

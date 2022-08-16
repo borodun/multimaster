@@ -6,7 +6,7 @@ type Database struct {
 	Labels map[string]string `yaml:"labels,omitempty"`
 }
 
-type Spec struct {
+type Metrics struct {
 	Databases             []Database        `yaml:"databases,omitempty"`
 	ListenPort            int               `yaml:"listenPort,omitempty"`
 	Interval              int               `yaml:"interval,omitempty"`
@@ -16,5 +16,5 @@ type Spec struct {
 }
 
 type Config struct {
-	Spec Spec `yaml:"spec,omitempty"`
+	Metrics Metrics `yaml:"metrics,omitempty"`
 }
