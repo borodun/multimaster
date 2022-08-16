@@ -16,7 +16,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:   "mmts-metrics [--config config.yaml]",
-		Short: "Metrics server for Postgres multimaster ",
+		Short: "Metrics server for Postgres multimaster",
 		Run: func(cmd *cobra.Command, args []string) {
 			metrics.Run(cfg)
 		},
