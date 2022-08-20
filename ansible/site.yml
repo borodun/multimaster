@@ -2,7 +2,7 @@
 # Prepare nodes for postgres and multimaster
 # Connecting to root
 - name: Update systems and create user
-  hosts: mm1 #,mm2
+  hosts: mm1,mm2
   tags: prepare
   tasks:
   - name: Install updates
@@ -43,7 +43,7 @@
 
 # Build postgres and multimaster
 - name: Prepare for multimasters
-  hosts: mm1 #,mm2
+  hosts: mm1,mm2
   remote_user: postgres # Connecting to non-root
   tasks:
   - name: Clone modified postgres
@@ -94,12 +94,12 @@
     tags: pgdata,install
     become: yes # Same
     shell: | 
-      mkdir /usr/local/pgsql/data
-      chown postgres /usr/local/pgsql/data
+      mkdir ./db
+      chown postgres ./db
 
   - name: Init database
     tags: initdb,install
-    shell: /usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data
+    shell: /usr/local/pgsql/bin/initdb -D ./db
     register: out
 
   - debug:
@@ -110,7 +110,7 @@
     tags: copy,cfg,install
     copy:
       src: "{{ item }}"
-      dest: /usr/local/pgsql/data/
+      dest: ./db
       owner: postgres
     with_items:
       - pg_hba.conf
@@ -137,7 +137,7 @@
     tags: start,install
     shell: |
       rm logfile
-      /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data -l logfile start
+      /usr/local/pgsql/bin/pg_ctl -D ./db -l ./db/logfile start
     register: out
 
   - debug: 
@@ -155,7 +155,7 @@
   
   - name: Stop postgres
     tags: stop,uninstall
-    shell: /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data stop
+    shell: /usr/local/pgsql/bin/pg_ctl -D ./db stop
     register: out
 
   - debug: 
@@ -165,11 +165,11 @@
   - name: Remove PGDATA
     tags: rmpgdata,uninstall
     become: yes # Same
-    shell: rm -rf /usr/local/pgsql/data
+    shell: rm -rf ./db
 
   - name: Status postgres
     tags: status
-    shell: /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data status
+    shell: /usr/local/pgsql/bin/pg_ctl -D ./db status
     register: out
 
   - debug: 
@@ -178,7 +178,7 @@
   
 # Nodes that will init multimasters
 - name: Init multimaster clusters
-  hosts: init1 #, init2
+  hosts: init1, init2
   remote_user: postgres
   tags: clusters
   tasks:
@@ -196,7 +196,7 @@
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
 
 - name: Enable monitoring
-  hosts: init1
+  hosts: init1,init2
   remote_user: postgres
   tags: monitoring
   tasks:
@@ -217,7 +217,7 @@
 
 # Check statuses of mm clusters       
 - name: Status multimasters 
-  hosts: init1 #, init2
+  hosts: init1, init2
   remote_user: postgres
   tags: checkmm
   tasks:
