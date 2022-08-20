@@ -40,6 +40,7 @@
   - name: Update PATH env var
     shell: |
       echo "export PATH=$PATH:/usr/local/pgsql/bin" | tee -a /etc/profile
+      echo "export PATH=$PATH:/usr/local/pgsql/bin" | tee -a ./bashrc
 
 # Build postgres and multimaster
 - name: Prepare for multimasters
@@ -136,7 +137,6 @@
   - name: Start postgres
     tags: start,install
     shell: |
-      rm logfile
       /usr/local/pgsql/bin/pg_ctl -D ./db -l ./db/logfile start
     register: out
 
