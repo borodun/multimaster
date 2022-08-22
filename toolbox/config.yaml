@@ -1,0 +1,34 @@
+# Backup specs
+toolbox:
+  # List of ssh and db connections to multimaster nodes
+  # Template url: postgresql://username:password@host:port/dbname[?paramspec]
+  # You might want to create password file, see: https://www.postgresql.org/docs/14/libpq-pgpass.html
+  connections:
+    - name: node0
+      pgurl: postgresql://user:1234@node0:5432/mydb?sslmode=disable
+      ssh:
+        user: user
+        host: node0
+        port: 22
+        # Default: $HOME/.ssh/id_rsa
+        key: /path/to/node/key
+    - name: node1
+      pgurl: # Can be empty
+      ssh:
+        user: user
+        host: node1
+        port: 22
+        key: /path/to/node/key
+        bastion:
+          user: user
+          host: node0
+          port: 22
+          # Default: $HOME/.ssh/id_rsa
+          key: /path/to/bastion/key
+
+  # Path to PGDATA for new nodes
+  # Postgres logfile will be saved in that directory
+  pgdata: ./db
+  # Path to PGBIN
+  pgbin: /usr/local/pgsql/bin
+
