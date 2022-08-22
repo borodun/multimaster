@@ -21,11 +21,11 @@
       }
     ]
   },
-  "editable": true,
+  "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1660977397175,
+  "iteration": 1661156200244,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -212,7 +212,7 @@
         ]
       },
       "gridPos": {
-        "h": 5,
+        "h": 8,
         "w": 10,
         "x": 0,
         "y": 1
@@ -253,7 +253,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "mtm_gen_num{connection_name=~\"$conn\"}[$__range]",
+          "expr": "mtm_gen_num{connection_name=~\"$conn\"}",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -339,6 +339,7 @@
             },
             "indexByName": {},
             "renameByName": {
+              "Value #E": "",
               "connection_name": ""
             }
           }
@@ -403,7 +404,7 @@
         "uid": "${ds_prometheus}"
       },
       "gridPos": {
-        "h": 5,
+        "h": 8,
         "w": 14,
         "x": 10,
         "y": 1
@@ -526,7 +527,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 9
       },
       "id": 8,
       "panels": [],
@@ -592,7 +593,7 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 10
       },
       "id": 4,
       "options": {
@@ -685,7 +686,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 10
       },
       "id": 21,
       "options": {
@@ -777,7 +778,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 12
+        "y": 15
       },
       "id": 10,
       "options": {
@@ -868,7 +869,7 @@
         "h": 5,
         "w": 8,
         "x": 8,
-        "y": 12
+        "y": 15
       },
       "id": 23,
       "options": {
@@ -959,7 +960,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 12
+        "y": 15
       },
       "id": 22,
       "options": {
@@ -1063,7 +1064,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 20
       },
       "id": 12,
       "options": {
@@ -1101,7 +1102,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 26
       },
       "id": 14,
       "panels": [],
@@ -1151,7 +1152,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1166,7 +1168,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 27
       },
       "id": 16,
       "options": {
@@ -1239,7 +1241,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1254,7 +1257,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 27
       },
       "id": 18,
       "options": {
@@ -1290,7 +1293,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 33
       },
       "id": 27,
       "panels": [],
@@ -1340,7 +1343,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1355,7 +1359,7 @@
         "h": 8,
         "w": 10,
         "x": 0,
-        "y": 31
+        "y": 34
       },
       "id": 25,
       "options": {
@@ -1433,7 +1437,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1448,7 +1453,7 @@
         "h": 8,
         "w": 7,
         "x": 10,
-        "y": 31
+        "y": 34
       },
       "id": 28,
       "options": {
@@ -1526,7 +1531,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1541,7 +1547,7 @@
         "h": 8,
         "w": 7,
         "x": 17,
-        "y": 31
+        "y": 34
       },
       "id": 29,
       "options": {
@@ -1582,7 +1588,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 42
       },
       "id": 31,
       "panels": [],
@@ -1632,7 +1638,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1647,7 +1654,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 40
+        "y": 43
       },
       "id": 33,
       "options": {
@@ -1699,7 +1706,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1779,7 +1787,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 40
+        "y": 43
       },
       "id": 34,
       "options": {
@@ -1791,7 +1799,12 @@
           "show": false
         },
         "showHeader": true,
-        "sortBy": []
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Time per call"
+          }
+        ]
       },
       "pluginVersion": "8.5.2",
       "targets": [
@@ -1833,7 +1846,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 51
       },
       "id": 37,
       "panels": [],
@@ -1883,7 +1896,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1899,7 +1913,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 52
       },
       "id": 38,
       "options": {
@@ -1998,6 +2012,6 @@
   "timezone": "",
   "title": "Nodes",
   "uid": "PWLW0WmVz",
-  "version": 7,
+  "version": 12,
   "weekStart": ""
 }
