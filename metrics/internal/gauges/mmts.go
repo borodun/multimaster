@@ -21,7 +21,7 @@ func (g *Gauges) checkMultimaster() {
 	g.mmts = true
 }
 
-type status struct {
+type statusTup struct {
 	Status string `db:"status"`
 }
 
@@ -51,7 +51,7 @@ func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
 
 	go func() {
 		for {
-			var status []status
+			var status []statusTup
 			err := g.query(mtmNodeStatusQuery, &status, emptyParams)
 
 			for _, statusType := range statusTypes {
@@ -59,14 +59,20 @@ func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
 					"status": statusType,
 				}).Set(0)
 
-				if err != nil && strings.Contains(strings.Split(err.Error(), ":")[2], statusType) ||
-					err == nil && status[0].Status == statusType {
+				if err != nil {
+					if strings.Contains(err.Error(), "[MTM] multimaster node is not online") {
+						if strings.Contains(strings.Split(err.Error(), ":")[2], statusType) {
+							gauge.With(prometheus.Labels{
+								"status": statusType,
+							}).Set(1)
+						}
+					}
+				} else if status[0].Status == statusType {
 					gauge.With(prometheus.Labels{
 						"status": statusType,
 					}).Set(1)
 				}
 			}
-
 			time.Sleep(g.interval)
 		}
 	}()
