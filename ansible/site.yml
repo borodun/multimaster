@@ -27,7 +27,7 @@
     user: 
       name: postgres
       shell: /bin/bash
-      password: $6$FgLxeneHNpbe5Ugx$kTl14v2KF5NAW/f3cVK78iC4mh/mE.wpowZ/ygZ8PcALbUXQpEcd7asN2FLbn.JlZ5PjJN18TlyWRMMc/fr.F1 # 1234
+      password: $6$uSe5/bgoRHyCJV22$RgSG1ZI5T/49iL8LP6a1eA32vYNvTD/t.bFWrMVo60IonMqjZv.DVGTceSvCg413iskR/uZsjDVu5QyZN2Tto0
 
   - name: Add postgres to sudoers
     shell: sudo usermod -aG sudo postgres
@@ -93,7 +93,6 @@
 # Configure and control pg
   - name: Create PGDATA
     tags: pgdata,install
-    become: yes # Same
     shell: | 
       mkdir ./db
       chown postgres ./db
@@ -164,7 +163,6 @@
  
   - name: Remove PGDATA
     tags: rmpgdata,uninstall
-    become: yes # Same
     shell: rm -rf ./db
 
   - name: Status postgres
