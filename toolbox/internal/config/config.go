@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tg/pgpass"
 	nurl "net/url"
+	"sort"
 	"strings"
 )
 
@@ -57,6 +58,15 @@ func (c *Config) GetConn(name string) *Connection {
 		}
 	}
 	return nil
+}
+
+func (c *Config) GetAllConnNames() []string {
+	names := make([]string, 0, len(c.Toolbox.Connections))
+	for _, connection := range c.Toolbox.Connections {
+		names = append(names, connection.Name)
+	}
+	sort.Strings(names)
+	return names
 }
 
 func (c *Connection) ParseURL() string {

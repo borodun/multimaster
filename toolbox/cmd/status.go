@@ -34,7 +34,7 @@ func getConnConf(args []string) []connection.Conf {
 }
 
 func fromArgs(args []string) []connection.Conf {
-	connConfs := make([]connection.Conf, len(args))
+	connConfs := make([]connection.Conf, 0)
 
 	for _, arg := range args {
 		conf := connection.Conf{
@@ -51,7 +51,7 @@ func fromArgs(args []string) []connection.Conf {
 }
 
 func fromConfig() []connection.Conf {
-	connConfs := make([]connection.Conf, len(cfg.Toolbox.Connections))
+	connConfs := make([]connection.Conf, 0)
 
 	for _, conn := range cfg.Toolbox.Connections {
 		conf := connection.Conf{

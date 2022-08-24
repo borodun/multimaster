@@ -3,6 +3,7 @@ package add
 import (
 	"backup/internal/config"
 	"backup/internal/connection"
+	"backup/internal/utils"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -26,14 +27,7 @@ func (m *MtmAddNode) Run() {
 	m.dstSSH = m.Connections[m.DstNode].SSH
 
 	fmt.Println("Checking connection")
-	if err := m.srcDB.TruePing(); err != nil {
-		fmt.Printf("Cannot ping '%s' database", m.SrcNode)
-		log.WithError(err).Fatalf("cannot ping '%s' database", m.SrcNode)
-	}
-	if stat := m.srcDB.MtmStatus(); stat != "online" {
-		fmt.Printf("Multimaster node is not online, current status: %s\n", stat)
-		log.Fatalf("multimaster node is not online, current status: %s", stat)
-	}
+	utils.CheckDatabases(m.srcDB)
 
 	fmt.Printf("Creating replication slot for new node \n")
 	id := m.mtmAddNodeAndGetID()
@@ -41,7 +35,7 @@ func (m *MtmAddNode) Run() {
 
 	log.RegisterExitHandler(func() {
 		m.mtmDropNodeByID(id)
-		fmt.Printf("Something went wrong, add --verbose flag to see logs")
+		fmt.Println("Something went wrong, add --verbose flag to see logs")
 	})
 
 	m.dstSSH.PgCtlStop()
@@ -71,7 +65,7 @@ func (m *MtmAddNode) mtmJoinNode(id, lsn string) {
 	if err != nil {
 		log.WithError(err).Fatal("cannot join node")
 	}
-	log.Infof("node added successfully, id: %s", id)
+	log.Infof("'%s' joined successfully, id: %s", m.DstNode, id)
 }
 
 func (m *MtmAddNode) setNodeConnStr() {
@@ -103,12 +97,10 @@ func (m *MtmAddNode) setNodeConnStr() {
 }
 
 func (m *MtmAddNode) mtmDropNodeByID(id string) {
-	mtmAddNodeQuery := fmt.Sprintf(`SELECT mtm.drop_node(%s)`, id)
-
-	db := m.Connections[m.SrcNode].DB
+	mtmDropNodeQuery := fmt.Sprintf(`SELECT COALESCE(drop_node, 'null') FROM mtm.drop_node(%s)`, id)
 
 	var info []string
-	err := db.Query(mtmAddNodeQuery, &info)
+	err := m.srcDB.Query(mtmDropNodeQuery, &info)
 
 	if err != nil {
 		log.WithError(err).Warn("cannot drop node")

@@ -24,13 +24,17 @@ func Connect(cfg config.Config, connConf []Conf) Connections {
 	logger.SetLevel(log.GetLevel())
 	rig.SetLogger(logger)
 
+	connNames := cfg.GetAllConnNames()
+	for _, conf := range connConf {
+		if !arrayContains(connNames, conf.ConnName) {
+			log.Fatalf("config doesn't contain connection for '%s'", conf.ConnName)
+		}
+	}
+
 	connections := make(Connections)
 
-	for _, conn := range cfg.Toolbox.Connections {
-		conf := findConf(connConf, conn.Name)
-		if conf == nil {
-			continue
-		}
+	for _, conf := range connConf {
+		conn := cfg.GetConn(conf.ConnName)
 
 		connLog := log.WithField("conn", conn.Name)
 
@@ -65,13 +69,13 @@ func Connect(cfg config.Config, connConf []Conf) Connections {
 	return connections
 }
 
-func findConf(arr []Conf, name string) *Conf {
+func arrayContains(arr []string, name string) bool {
 	for _, e := range arr {
-		if e.ConnName == name {
-			return &e
+		if e == name {
+			return true
 		}
 	}
-	return nil
+	return false
 }
 
 func connectToHost(sshConf config.Ssh, required bool) (*SSH, error) {

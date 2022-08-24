@@ -30,6 +30,10 @@ func NewDB(db *sql.DB, name string) *DB {
 	return d
 }
 
+func (d *DB) GetName() string {
+	return d.name
+}
+
 func (d *DB) HasSharedPreloadLibrary(lib string) bool {
 	var libs []string
 	if err := d.Query("SHOW shared_preload_libraries", &libs); err != nil {
@@ -126,13 +130,15 @@ func (d *DB) TruePing() error {
 }
 
 type statusTup struct {
+	Id     string `db:"my_node_id"`
 	Status string `db:"status"`
 }
 
-func (d *DB) MtmStatus() string {
-	const mtmNodeStatusQuery = `
-		SELECT status FROM mtm.status()
+const mtmNodeStatusQuery = `
+		SELECT my_node_id, status FROM mtm.status()
 	`
+
+func (d *DB) MtmStatus() string {
 
 	var statusTypes = []string{
 		"online",
@@ -160,4 +166,14 @@ func (d *DB) MtmStatus() string {
 	}
 
 	return ""
+}
+
+func (d *DB) GetMtmNodeID() string {
+	var status []statusTup
+	err := d.Query(mtmNodeStatusQuery, &status)
+	if err != nil {
+		log.WithError(err).
+			WithField("conn", d.name).Fatal("couldn't get node id in mtm")
+	}
+	return status[0].Id
 }

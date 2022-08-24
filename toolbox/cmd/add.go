@@ -44,7 +44,7 @@ func init() {
 }
 
 func addConnConf() []connection.Conf {
-	connConfs := make([]connection.Conf, 2)
+	connConfs := make([]connection.Conf, 0)
 
 	srcConf := connection.Conf{
 		ConnName:    srcNode,
