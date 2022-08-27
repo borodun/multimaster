@@ -25,7 +25,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1661156200244,
+  "iteration": 1661587067959,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -1173,9 +1173,11 @@
       "id": 16,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
+          "calcs": [
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "right"
         },
         "tooltip": {
           "mode": "multi",
@@ -1262,9 +1264,11 @@
       "id": 18,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
+          "calcs": [
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "right"
         },
         "tooltip": {
           "mode": "multi",
@@ -2012,6 +2016,6 @@
   "timezone": "",
   "title": "Nodes",
   "uid": "PWLW0WmVz",
-  "version": 12,
+  "version": 14,
   "weekStart": ""
 }
