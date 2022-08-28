@@ -18,6 +18,10 @@ spec:
         prometheus.deckhouse.io/port: "8080"
         prometheus.deckhouse.io/sample-limit: "5000"
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: mmts-metrics
           image: borodun/mmts-metrics
@@ -25,13 +29,27 @@ spec:
             - containerPort: 8080
           volumeMounts:
             - name: config
-              mountPath: /mmts/config.yaml
+              mountPath: /home/mmts/config.yaml
               subPath: config.yaml
+            - name: pgpass
+              mountPath: /home/mmts/.pgpass
+              subPath: .pgpass
+              readOnly: true
+            - name: hosts
+              mountPath: /etc/hosts
+              subPath: hosts
+              readOnly: true
       volumes:
         - name: config
           secret:
             secretName: mmts-metrics-config
             optional: false
-            items:
-              - key: config.yaml
-                path: config.yaml
+        - name: pgpass
+          secret:
+            secretName: mmts-metrics-pgpass
+            optional: false
+            defaultMode: 0600
+        - name: hosts
+          secret:
+            optional: false
+            secretName: mmts-metrics-hosts

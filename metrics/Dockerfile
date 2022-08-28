@@ -12,7 +12,20 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o mmts-metrics
 
 FROM alpine:3.16
 
-WORKDIR /mmts
+WORKDIR /home/mmts
+
+RUN addgroup --gid 1000 mmts
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/home/mmts" \
+    --ingroup mmts \
+    --no-create-home \
+    --uid 1000 \
+    mmts
+
+USER mmts
+
 COPY --from=build /mmts/mmts-metrics ./mmts-metrics
 
 EXPOSE 8080
