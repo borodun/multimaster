@@ -1,4 +1,4 @@
-# Backup specs
+# Toolbox specs
 toolbox:
   # List of ssh and db connections to multimaster nodes
   # Template url: postgresql://username:password@host:port/dbname[?paramspec]
@@ -13,7 +13,7 @@ toolbox:
         # Default: $HOME/.ssh/id_rsa
         key: /path/to/node/key
     - name: node1
-      pgurl: # Can be empty
+      pgurl: postgresql://user:1234@node1:5432/mydb?sslmode=disable
       ssh:
         user: user
         host: node1

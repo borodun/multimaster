@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mmts-toolbox-deployment
+  labels:
+    app: mmts-toolbox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mmts-toolbox
+  template:
+    metadata:
+      labels:
+        app: mmts-toolbox
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: mmts-toolbox
+          image: borodun/mmts-toolbox
+          command: [ "/bin/sh", "-c", "--" ]
+          args: [ "while true; do sleep 30; done;" ]
+          ports:
+            - containerPort: 2222
+          volumeMounts:
+            - name: config
+              mountPath: /home/mmts/config.yaml
+              subPath: config.yaml
+            - name: pgpass
+              mountPath: /home/mmts/.pgpass
+              subPath: .pgpass
+              readOnly: true
+            - name: ssh-keys
+              mountPath: /home/mmts/.ssh
+              readOnly: true
+            - name: hosts
+              mountPath: /etc/hosts
+              subPath: hosts
+              readOnly: true
+      volumes:
+        - name: config
+          secret:
+            secretName: mmts-toolbox-config
+            optional: false
+        - name: pgpass
+          secret:
+            secretName: mmts-toolbox-pgpass
+            optional: false
+            defaultMode: 0600
+        - name: ssh-keys
+          secret:
+            optional: false
+            secretName: mmts-toolbox-ssh-keys
+            defaultMode: 0600
+        - name: hosts
+          secret:
+            optional: false
+            secretName: mmts-toolbox-hosts
