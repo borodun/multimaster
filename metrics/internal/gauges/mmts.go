@@ -56,7 +56,7 @@ func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
 
 			var statusFromErr string
 			if err != nil {
-				if strings.Contains(err.Error(), "multimaster node is not online: current status") {
+				if strings.Contains(err.Error(), "pq: [MTM] multimaster node is not online: current status") {
 					statusFromErr = strings.Split(err.Error(), ":")[2]
 				}
 			}
@@ -66,10 +66,7 @@ func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
 					"status": statusType,
 				}).Set(0)
 
-				if len(status) == 0 {
-					continue
-				}
-				if status[0].Status == statusType || statusFromErr == statusType {
+				if (len(status) != 0 && status[0].Status == statusType) || strings.Contains(statusFromErr, statusType) {
 					gauge.With(prometheus.Labels{
 						"status": statusType,
 					}).Set(1)
