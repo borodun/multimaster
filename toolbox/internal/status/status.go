@@ -18,22 +18,17 @@ func (m *MtmStatus) Run() {
 		db := m.Connections[name].DB
 		if db == nil || !db.Ping() {
 			statuses[name] = "offline"
-			continue
 		}
 
 		if !db.HasSharedPreloadLibrary("multimaster") {
 			statuses[name] = "multimaster is not in shared_preload_libraries"
-			continue
-		}
-
-		if !db.HasExtension("multimaster") {
-			statuses[name] = "multimaster extension is not installed"
-			continue
+			if !db.HasExtension("multimaster") {
+				statuses[name] = "multimaster extension is not installed"
+			}
 		}
 
 		if stat := db.MtmStatus(); stat != "" {
 			statuses[name] = stat
-			continue
 		}
 	}
 

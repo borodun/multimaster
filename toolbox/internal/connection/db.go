@@ -150,13 +150,22 @@ func (d *DB) MtmStatus() string {
 
 	var status []statusTup
 	err := d.Query(mtmNodeStatusQuery, &status)
+
 	if err != nil {
-		if strings.Contains(err.Error(), "multimaster node is not online: current status") {
-			return strings.Split(err.Error(), ":")[2]
+		if strings.Contains(err.Error(), "pq: [MTM] multimaster node is not online: current status") {
+			stat := strings.Split(err.Error(), ":")[2]
+			for _, statusType := range statusTypes {
+				if strings.Contains(stat, statusType) {
+					return statusType
+				}
+			}
 		} else if strings.Contains(err.Error(), "multimaster is not configured") {
 			return "multimaster is not configured"
+		} else if strings.Contains(err.Error(), "connection refused") {
+			return "offline"
+		} else {
+			return fmt.Sprintf("unknown error: %s", err.Error())
 		}
-		return fmt.Sprintf("unknown err: %s", err.Error())
 	}
 
 	for _, statusType := range statusTypes {
@@ -165,7 +174,7 @@ func (d *DB) MtmStatus() string {
 		}
 	}
 
-	return ""
+	return fmt.Sprintf("unkown status: %s", status[0].Status)
 }
 
 func (d *DB) GetMtmNodeID() string {
