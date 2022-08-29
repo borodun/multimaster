@@ -28,7 +28,7 @@ toolbox:
 
   # Path to PGDATA for new nodes
   # Postgres logfile will be saved in that directory
-  pgdata: ./db
+  pgdata: ~/db
   # Path to PGBIN
   pgbin: /usr/local/pgsql/bin
 
