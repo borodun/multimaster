@@ -15,7 +15,7 @@ var (
 	cfg        config.Config
 
 	rootCmd = &cobra.Command{
-		Use:   "mmts-metrics [--config config.yaml]",
+		Use:   "mtm-metrics [--config config.yaml]",
 		Short: "Metrics server for Postgres multimaster",
 		Run: func(cmd *cobra.Command, args []string) {
 			metrics.Run(cfg)

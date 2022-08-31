@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mmts-metrics-deployment
+  name: mtm-metrics-deployment
   labels:
-    app: mmts-metrics
+    app: mtm-metrics
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mmts-metrics
+      app: mtm-metrics
   template:
     metadata:
       labels:
-        app: mmts-metrics
-        prometheus.deckhouse.io/custom-target: mmts-metrics
+        app: mtm-metrics
+        prometheus.deckhouse.io/custom-target: mtm-metrics
       annotations:
         prometheus.deckhouse.io/port: "8080"
         prometheus.deckhouse.io/sample-limit: "5000"
@@ -23,8 +23,8 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
       containers:
-        - name: mmts-metrics
-          image: borodun/mmts-metrics
+        - name: mtm-metrics
+          image: borodun/mtm-metrics
           ports:
             - containerPort: 8080
           volumeMounts:
@@ -42,14 +42,14 @@ spec:
       volumes:
         - name: config
           secret:
-            secretName: mmts-metrics-config
+            secretName: mtm-metrics-config
             optional: false
         - name: pgpass
           secret:
-            secretName: mmts-metrics-pgpass
+            secretName: mtm-metrics-pgpass
             optional: false
             defaultMode: 0600
         - name: hosts
           secret:
             optional: false
-            secretName: mmts-metrics-hosts
+            secretName: mtm-metrics-hosts

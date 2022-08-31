@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o mmts-metrics
+RUN CGO_ENABLED=0 GOOS=linux go build -o mtm-metrics
 
 FROM alpine:3.16
 
@@ -26,7 +26,7 @@ RUN adduser \
 
 USER mmts
 
-COPY --from=build /mmts/mmts-metrics ./mmts-metrics
+COPY --from=build /mmts/mtm-metrics ./mtm-metrics
 
 EXPOSE 8080
-ENTRYPOINT ["./mmts-metrics"]
+ENTRYPOINT ["./mtm-metrics"]
