@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mmts-toolbox-deployment
+  name: mtmctl-deployment
   labels:
-    app: mmts-toolbox
+    app: mtmctl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mmts-toolbox
+      app: mtmctl
   template:
     metadata:
       labels:
-        app: mmts-toolbox
+        app: mtmctl
     spec:
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
       containers:
-        - name: mmts-toolbox
-          image: borodun/mmts-toolbox
+        - name: mtmctl
+          image: borodun/mtmctl
           command: [ "/bin/sh", "-c", "--" ]
           args: [ "while true; do sleep 30; done;" ]
           ports:
@@ -43,19 +43,19 @@ spec:
       volumes:
         - name: config
           secret:
-            secretName: mmts-toolbox-config
+            secretName: mtmctl-config
             optional: false
         - name: pgpass
           secret:
-            secretName: mmts-toolbox-pgpass
+            secretName: mtmctl-pgpass
             optional: false
             defaultMode: 0600
         - name: ssh-keys
           secret:
             optional: false
-            secretName: mmts-toolbox-ssh-keys
+            secretName: mtmctl-ssh-keys
             defaultMode: 0600
         - name: hosts
           secret:
             optional: false
-            secretName: mmts-toolbox-hosts
+            secretName: mtmctl-hosts

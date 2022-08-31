@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o mmts-toolbox
+RUN CGO_ENABLED=0 GOOS=linux go build -o mtmctl
 
 FROM alpine:3.16
 
@@ -26,4 +26,4 @@ RUN adduser \
 
 USER mmts
 
-COPY --from=build /mmts/mmts-toolbox ./mmts-toolbox
+COPY --from=build /mmts/mtmctl ./mtmctl

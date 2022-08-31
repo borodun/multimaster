@@ -15,7 +15,7 @@ var (
 	cfg        config.Config
 
 	rootCmd = &cobra.Command{
-		Use:   "mmts-toolbox [--config config.yaml]",
+		Use:   "mtmctl <cmd> [--config config.yaml]",
 		Short: "Toolbox for Postgres multimaster",
 	}
 )
