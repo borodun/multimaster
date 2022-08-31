@@ -6,11 +6,10 @@ ff02::1	ip6-allnodes
 ff02::2	ip6-allrouters
 127.0.1.1	localhost.vm	localhost
 
-10.10.10.221 node0
-10.10.10.200 node1
-10.10.10.167 node2
-10.10.10.164 node3
-10.10.10.29 node4
-10.10.10.27 node5
+10.10.10.115 node0
+10.10.10.196 node1
+10.10.10.4 node2
+10.10.10.102 node3
+10.10.10.233 node4
 
-87.242.94.208 mm
+87.242.90.103 mm

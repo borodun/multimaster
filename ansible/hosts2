@@ -9,7 +9,7 @@
 [mm2]
 node3
 node4
-node5
+#node5
 
 # Nodes that will initaiate multimaster clusters
 #[init1]

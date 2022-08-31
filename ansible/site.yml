@@ -39,13 +39,14 @@
 
   - name: Update PATH env var
     shell: |
-      echo "export PATH=$PATH:/usr/local/pgsql/bin" | tee -a /etc/profile
-      echo "export PATH=$PATH:/usr/local/pgsql/bin" | tee -a ./bashrc
+      echo "export PATH=$PATH:/home/postgres/pgsql/bin" | tee -a ~/.bashrc
 
 # Build postgres and multimaster
 - name: Prepare for multimasters
   hosts: mm1,mm2
-  remote_user: postgres # Connecting to non-root
+  remote_user: postgres 
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/home/postgres/pgsql/bin"
   tasks:
   - name: Clone modified postgres
     tags: pg,build
@@ -63,9 +64,8 @@
 
   - name: Compile postgres
     tags: pg,build
-    become: yes # We need root priveleges to build pg into /usr/local/
     shell: |
-      ./configure
+      ./configure --prefix='/home/postgres/pgsql'
       make
       make install
     args:
@@ -73,33 +73,33 @@
 
   - name: Compile multimaster
     tags: mm,build
-    become: yes # Same
     shell: make install
     args:
       chdir: /home/postgres/postgres_cluster/contrib/mmts
 
   - name: Compile pg_stat_statements
     tags: build
-    become: yes # Same
     shell: make install
     args:
       chdir: /home/postgres/postgres_cluster/contrib/pg_stat_statements
 
+  - name: Update PATH env var
+    tags: env
+    shell: |
+      echo "export PATH=$PATH:/home/postgres/pgsql/bin" | tee -a ~/.bashrc
+
   - name: Remove pgsql
     tags: rmpgsql
-    become: yes # Same
     shell: rm -rf /usr/local/pgsql
 
 # Configure and control pg
   - name: Create PGDATA
     tags: pgdata,install
-    shell: | 
-      mkdir ./db
-      chown postgres ./db
+    shell: mkdir ./db
 
   - name: Init database
     tags: initdb,install
-    shell: /usr/local/pgsql/bin/initdb -D ./db
+    shell: initdb -D ./db
     register: out
 
   - debug:
@@ -135,8 +135,7 @@
 
   - name: Start postgres
     tags: start,install
-    shell: |
-      /usr/local/pgsql/bin/pg_ctl -D ./db -l ./db/logfile start
+    shell: pg_ctl -D ./db -l ./db/logfile start
     register: out
 
   - debug: 
@@ -145,7 +144,7 @@
 
   - name: Bootstrpap db
     tags: bootstrap,install
-    shell: /usr/local/pgsql/bin/psql -f bootstrap.sql
+    shell: psql -f bootstrap.sql
     register: out
 
   - debug: 
@@ -154,7 +153,7 @@
   
   - name: Stop postgres
     tags: stop,uninstall
-    shell: /usr/local/pgsql/bin/pg_ctl -D ./db stop
+    shell: pg_ctl -D ./db stop
     register: out
 
   - debug: 
@@ -167,7 +166,7 @@
 
   - name: Status postgres
     tags: status
-    shell: /usr/local/pgsql/bin/pg_ctl -D ./db status
+    shell: pg_ctl -D ./db status
     register: out
 
   - debug: 
@@ -178,6 +177,8 @@
 - name: Init multimaster clusters
   hosts: init1, init2
   remote_user: postgres
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/home/postgres/pgsql/bin"
   tags: clusters
   tasks:
   - name: Copy init files
@@ -187,7 +188,7 @@
     register: out
 
   - name: Init multimaster
-    shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -f {{ mtm_file }}
+    shell: psql -U mtmuser -d mydb -f {{ mtm_file }}
     register: out
 
   - debug:
@@ -196,6 +197,8 @@
 - name: Enable monitoring
   hosts: init1,init2
   remote_user: postgres
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/home/postgres/pgsql/bin"
   tags: monitoring
   tasks:
   - name: Copy monitoring.sql
@@ -207,7 +210,7 @@
       - monitoring.sql
 
   - name: Add monitoring
-    shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -f monitoring.sql
+    shell: psql -U mtmuser -d mydb -f monitoring.sql
     register: out
 
   - debug:
@@ -217,17 +220,19 @@
 - name: Status multimasters 
   hosts: init1, init2
   remote_user: postgres
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/home/postgres/pgsql/bin"
   tags: checkmm
   tasks:
   - name: Check multimasters
-    shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -c "SELECT * FROM mtm.status();"
+    shell: psql -U mtmuser -d mydb -c "SELECT * FROM mtm.status()"
     register: out
 
   - debug:
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
 
   - name: Check nodes
-    shell: /usr/local/pgsql/bin/psql -U mtmuser -d mydb -c "SELECT * FROM mtm.nodes();"
+    shell: psql -U mtmuser -d mydb -c "SELECT * FROM mtm.nodes()"
     register: out
 
   - debug:
