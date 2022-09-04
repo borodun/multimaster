@@ -1,21 +1,7 @@
 # Hosts for multimasters
 
 # Nodes that will be connected with multimasters
-#[mm1]
-#node0
-#node1
-#node2
-
 [mm2]
-node3
 node4
-#node5
-
-# Nodes that will initaiate multimaster clusters
-#[init1]
-#node0 mtm_file=mtm-0.sql
-
-[init2]
-node3 mtm_file=mtm-1.sql
-
+node5
 

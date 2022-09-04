@@ -175,7 +175,7 @@
   
 # Nodes that will init multimasters
 - name: Init multimaster clusters
-  hosts: init1, init2
+  hosts: init1
   remote_user: postgres
   environment:
     PATH: "{{ ansible_env.PATH }}:/home/postgres/pgsql/bin"
@@ -195,7 +195,7 @@
       msg: "{{out.stdout_lines}} {{out.stderr_lines}}"
 
 - name: Enable monitoring
-  hosts: init1,init2
+  hosts: init1
   remote_user: postgres
   environment:
     PATH: "{{ ansible_env.PATH }}:/home/postgres/pgsql/bin"
@@ -218,7 +218,7 @@
 
 # Check statuses of mm clusters       
 - name: Status multimasters 
-  hosts: init1, init2
+  hosts: init1
   remote_user: postgres
   environment:
     PATH: "{{ ansible_env.PATH }}:/home/postgres/pgsql/bin"

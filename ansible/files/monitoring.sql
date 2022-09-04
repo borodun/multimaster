@@ -7,3 +7,4 @@ GRANT USAGE ON SCHEMA mtm TO monitoring;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA mtm TO monitoring;
 GRANT pg_read_all_settings TO monitoring;
 GRANT pg_read_all_stats TO monitoring;
+GRANT SELECT ON mtm.cluster_nodes TO monitoring;
