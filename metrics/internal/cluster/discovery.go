@@ -15,8 +15,10 @@ type NodeStatus struct {
 
 func (c *Cluster) StartNodeDiscovery() {
 	go func() {
-		c.discoverNodes()
-		time.Sleep(c.Interval)
+		for {
+			c.discoverNodes()
+			time.Sleep(c.Interval)
+		}
 	}()
 }
 
