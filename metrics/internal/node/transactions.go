@@ -1,13 +1,13 @@
-package gauges
+package node
 
 import "github.com/prometheus/client_golang/prometheus"
 
-func (g *Gauges) TransactionsSum() prometheus.Gauge {
-	return g.new(
+func (n *Node) TransactionsSum() prometheus.Gauge {
+	return n.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_transactions_sum",
 			Help:        "Sum of all transactions in the database",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		`
 			SELECT xact_commit + xact_rollback
@@ -17,12 +17,12 @@ func (g *Gauges) TransactionsSum() prometheus.Gauge {
 	)
 }
 
-func (g *Gauges) TransactionsCommitSum() prometheus.Gauge {
-	return g.new(
+func (n *Node) TransactionsCommitSum() prometheus.Gauge {
+	return n.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_transactions_commit_sum",
 			Help:        "Sum of commit transactions in the database",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		`
 			SELECT xact_commit
@@ -32,12 +32,12 @@ func (g *Gauges) TransactionsCommitSum() prometheus.Gauge {
 	)
 }
 
-func (g *Gauges) TransactionsRollbackSum() prometheus.Gauge {
-	return g.new(
+func (n *Node) TransactionsRollbackSum() prometheus.Gauge {
+	return n.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_transactions_rollback_sum",
 			Help:        "Sum of rollback transactions in the database",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		`
 			SELECT xact_rollback

@@ -1,43 +1,42 @@
-package gauges
+package node
 
 import (
-	"time"
-
 	"github.com/ContaAzul/postgresql_exporter/postgres"
 	"github.com/prometheus/client_golang/prometheus"
+	"time"
 )
 
 // ConnectedBackends returns the number of backends currently connected to database
-func (g *Gauges) ConnectedBackends() prometheus.Gauge {
-	return g.new(
+func (n *Node) ConnectedBackends() prometheus.Gauge {
+	return n.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_backends_total",
 			Help:        "Number of backends currently connected to database",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		"SELECT numbackends FROM pg_stat_database WHERE datname = current_database()",
 	)
 }
 
 // MaxBackends returns the maximum number of concurrent connections in the database
-func (g *Gauges) MaxBackends() prometheus.Gauge {
-	return g.new(
+func (n *Node) MaxBackends() prometheus.Gauge {
+	return n.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_max_backends",
 			Help:        "Maximum number of concurrent connections in the database",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		"SELECT setting::numeric FROM pg_settings WHERE name = 'max_connections'",
 	)
 }
 
 // InstanceConnectedBackends returns the number of backends currently connected to all databases
-func (g *Gauges) InstanceConnectedBackends() prometheus.Gauge {
-	return g.new(
+func (n *Node) InstanceConnectedBackends() prometheus.Gauge {
+	return n.new(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_instance_connected_backends",
 			Help:        "Current number of concurrent connections in all databases",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		"SELECT sum(numbackends) FROM pg_stat_database;",
 	)
@@ -49,12 +48,12 @@ type backendsByState struct {
 }
 
 // BackendsByState returns the number of backends currently connected to database by state
-func (g *Gauges) BackendsByState() *prometheus.GaugeVec {
+func (n *Node) BackendsByState() *prometheus.GaugeVec {
 	var gauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_backends_by_state_total",
 			Help:        "Number of backends currently connected to database by state",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		[]string{"state"},
 	)
@@ -70,14 +69,14 @@ func (g *Gauges) BackendsByState() *prometheus.GaugeVec {
 		for {
 			gauge.Reset()
 			var backendsByState []backendsByState
-			if err := g.query(backendsByStateQuery, &backendsByState, emptyParams); err == nil {
+			if err := n.Db.Query(backendsByStateQuery, &backendsByState); err == nil {
 				for _, row := range backendsByState {
 					gauge.With(prometheus.Labels{
 						"state": row.State,
 					}).Set(row.Total)
 				}
 			}
-			time.Sleep(g.interval)
+			time.Sleep(n.Interval)
 		}
 	}()
 	return gauge
@@ -91,12 +90,12 @@ type backendsByUserAndClientAddress struct {
 
 // BackendsByUserAndClientAddress returns the number of backends currently connected
 // to database by user and client address
-func (g *Gauges) BackendsByUserAndClientAddress() *prometheus.GaugeVec {
+func (n *Node) BackendsByUserAndClientAddress() *prometheus.GaugeVec {
 	var gauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_backends_by_user_total",
 			Help:        "Number of backends currently connected to database by user and client address",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		[]string{"user", "client_addr"},
 	)
@@ -115,7 +114,7 @@ func (g *Gauges) BackendsByUserAndClientAddress() *prometheus.GaugeVec {
 		for {
 			gauge.Reset()
 			var backendsByUserAndClientAddress []backendsByUserAndClientAddress
-			if err := g.query(backendsByUserAndClientAddressQuery, &backendsByUserAndClientAddress, emptyParams); err == nil {
+			if err := n.Db.Query(backendsByUserAndClientAddressQuery, &backendsByUserAndClientAddress); err == nil {
 				for _, row := range backendsByUserAndClientAddress {
 					gauge.With(prometheus.Labels{
 						"user":        row.User,
@@ -123,7 +122,7 @@ func (g *Gauges) BackendsByUserAndClientAddress() *prometheus.GaugeVec {
 					}).Set(row.Total)
 				}
 			}
-			time.Sleep(g.interval)
+			time.Sleep(n.Interval)
 		}
 	}()
 	return gauge
@@ -134,8 +133,8 @@ type backendsByWaitEventType struct {
 	WaitEventType string  `db:"wait_event_type"`
 }
 
-func (g *Gauges) backendsByWaitEventTypeQuery() string {
-	if postgres.Version(g.version()).IsEqualOrGreaterThan96() {
+func (n *Node) backendsByWaitEventTypeQuery() string {
+	if postgres.Version(n.Db.Version()).IsEqualOrGreaterThan96() {
 		return `
 			SELECT
 			  COUNT(*) AS total,
@@ -157,12 +156,12 @@ func (g *Gauges) backendsByWaitEventTypeQuery() string {
 }
 
 // BackendsByWaitEventType returns the number of backends currently waiting on some event
-func (g *Gauges) BackendsByWaitEventType() *prometheus.GaugeVec {
+func (n *Node) BackendsByWaitEventType() *prometheus.GaugeVec {
 	var gauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_backends_by_wait_event_type_total",
 			Help:        "Number of backends currently waiting on some event",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		[]string{"wait_event_type"},
 	)
@@ -171,15 +170,14 @@ func (g *Gauges) BackendsByWaitEventType() *prometheus.GaugeVec {
 		for {
 			gauge.Reset()
 			var backendsByWaitEventType []backendsByWaitEventType
-			if err := g.query(g.backendsByWaitEventTypeQuery(),
-				&backendsByWaitEventType, emptyParams); err == nil {
+			if err := n.Db.Query(n.backendsByWaitEventTypeQuery(), &backendsByWaitEventType); err == nil {
 				for _, row := range backendsByWaitEventType {
 					gauge.With(prometheus.Labels{
 						"wait_event_type": row.WaitEventType,
 					}).Set(row.Total)
 				}
 			}
-			time.Sleep(g.interval)
+			time.Sleep(n.Interval)
 		}
 	}()
 	return gauge

@@ -3,11 +3,11 @@ package cmd
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"metrics/internal/metrics"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"metrics/internal/config"
-	"metrics/internal/metrics"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 	cfg        config.Config
 
 	rootCmd = &cobra.Command{
-		Use:   "mtm-metrics [--config config.yaml]",
+		Use:   "metrics-metrics [--config config.yaml]",
 		Short: "Metrics server for Postgres multimaster",
 		Run: func(cmd *cobra.Command, args []string) {
 			metrics.Run(cfg)

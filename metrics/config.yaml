@@ -4,12 +4,8 @@ metrics:
   # Template url: postgresql://username:password@host:port/dbname[?paramspec]
   # You might want to create password file, see: https://www.postgresql.org/docs/14/libpq-pgpass.html
   databases:
-    - name: node0
-      url: postgresql://user:1234@node0:5432/mydb?sslmode=disable
-      # Will override common labels
-      # All databases need to have same labels
-      #labels:
-      #  dc: east
+    - name: node1
+      url: postgresql://monitoring@node1:5432/mydb?sslmode=disable
 
   # Port that server will listen on for incoming connections
   # Default: 8080
@@ -27,6 +23,3 @@ metrics:
   # Default: 5
   connectionPoolMaxSize: 5
 
-  # Common labels
-  #labels:
-  #  dc: west

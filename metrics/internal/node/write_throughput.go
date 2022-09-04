@@ -1,9 +1,8 @@
-package gauges
+package node
 
 import (
-	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
+	"time"
 )
 
 type writingUsage struct {
@@ -12,12 +11,12 @@ type writingUsage struct {
 	TuplesDeleted  float64 `db:"tup_deleted"`
 }
 
-func (g *Gauges) DatabaseWritingUsage() *prometheus.GaugeVec {
+func (n *Node) DatabaseWritingUsage() *prometheus.GaugeVec {
 	var gauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_database_writing_usage",
 			Help:        "Number of inserted, updated and deleted rows per database",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		[]string{"stat"},
 	)
@@ -33,7 +32,7 @@ func (g *Gauges) DatabaseWritingUsage() *prometheus.GaugeVec {
 	go func() {
 		for {
 			var writingUsage []writingUsage
-			if err := g.query(databaseWritingUsageQuery, &writingUsage, emptyParams); err == nil {
+			if err := n.Db.Query(databaseWritingUsageQuery, &writingUsage); err == nil {
 				for _, database := range writingUsage {
 					gauge.With(prometheus.Labels{
 						"stat": "tup_inserted",
@@ -46,7 +45,7 @@ func (g *Gauges) DatabaseWritingUsage() *prometheus.GaugeVec {
 					}).Set(database.TuplesDeleted)
 				}
 			}
-			time.Sleep(g.interval)
+			time.Sleep(n.Interval)
 		}
 	}()
 	return gauge

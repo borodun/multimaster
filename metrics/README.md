@@ -12,13 +12,13 @@ make
 ### Building container
 
 ```shell
-docker build . -t borodun/mmts-toolbox
+docker build . -t borodun/mtm-metrics
 ```
 
 ### Running container
 
 ```shell
-docker run -p 8080:8080 -v $(pwd)/test/test-config.yaml:/home/mmts/config.yaml -v $HOME/.pgpass:/home/mmts/.pgpass borodun/mtm-metrics:latest
+docker run -p 8080:8080 -v $(pwd)/config.yaml:/home/mmts/config.yaml -v $HOME/.pgpass:/home/mmts/.pgpass borodun/mtm-metrics:latest
 ```
 
 ### Running in Kubernetes

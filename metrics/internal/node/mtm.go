@@ -1,39 +1,25 @@
-package gauges
+package node
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
 
-func (g *Gauges) checkMultimaster() {
-	if !g.hasExtension("multimaster") {
-		log.WithField("db", g.name).
-			Warn("mtm monitoring is disabled because multimaster extension is not installed")
-		return
-	}
-	if !g.hasSharedPreloadLibrary("multimaster") {
-		log.WithField("db", g.name).
-			Warn("mtm monitoring is disabled because multimaster is not on shared_preload_libraries")
-		return
-	}
-	g.mmts = true
-}
-
 type statusTup struct {
+	Id     int    `db:"my_node_id"`
 	Status string `db:"status"`
 }
 
-// MtmStatus returns status of a node in mtm cluster
-func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
+// MtmStatus returns status of a node in metrics cluster
+func (n *Node) MtmStatus() *prometheus.GaugeVec {
 	var gauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name:        "mtm_status",
-		Help:        "Node status in mtm cluster",
-		ConstLabels: g.labels,
+		Help:        "Node status in metrics cluster",
+		ConstLabels: n.Labels,
 	}, []string{"status"})
 
-	if !g.mmts {
+	if !n.mmts {
 		return gauge
 	}
 
@@ -52,7 +38,7 @@ func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
 	go func() {
 		for {
 			var status []statusTup
-			err := g.query(mtmNodeStatusQuery, &status, emptyParams)
+			err := n.Db.Query(mtmNodeStatusQuery, &status)
 
 			var statusFromErr string
 			if err != nil {
@@ -72,22 +58,21 @@ func (g *Gauges) MtmStatus() *prometheus.GaugeVec {
 					}).Set(1)
 				}
 			}
-			time.Sleep(g.interval)
+			time.Sleep(n.Interval)
 		}
 	}()
-
 	return gauge
 }
 
-// MtmGenNum returns generation of a node in mtm cluster
-func (g *Gauges) MtmGenNum() prometheus.Gauge {
+// MtmGenNum returns generation of a node in metrics cluster
+func (n *Node) MtmGenNum() prometheus.Gauge {
 	var gauge = prometheus.NewGauge(prometheus.GaugeOpts{
 		Name:        "mtm_gen_num",
-		Help:        "Node generation in mtm cluster",
-		ConstLabels: g.labels,
+		Help:        "Node generation in metrics cluster",
+		ConstLabels: n.Labels,
 	})
 
-	if !g.mmts {
+	if !n.mmts {
 		return gauge
 	}
 
@@ -96,10 +81,10 @@ func (g *Gauges) MtmGenNum() prometheus.Gauge {
 	go func() {
 		for {
 			var genNum []float64
-			if err := g.query(genNumQuery, &genNum, emptyParams); err == nil {
+			if err := n.Db.Query(genNumQuery, &genNum); err == nil {
 				gauge.Set(genNum[0])
 			}
-			time.Sleep(g.interval)
+			time.Sleep(n.Interval)
 		}
 	}()
 	return gauge

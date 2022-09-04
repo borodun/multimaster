@@ -1,9 +1,8 @@
-package gauges
+package node
 
 import (
-	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
+	"time"
 )
 
 type readingUsage struct {
@@ -11,12 +10,12 @@ type readingUsage struct {
 	TuplesFetched  float64 `db:"tup_fetched"`
 }
 
-func (g *Gauges) DatabaseReadingUsage() *prometheus.GaugeVec {
+func (n *Node) DatabaseReadingUsage() *prometheus.GaugeVec {
 	var gauge = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:        "postgresql_database_reading_usage",
 			Help:        "Database reading usage statistics",
-			ConstLabels: g.labels,
+			ConstLabels: n.Labels,
 		},
 		[]string{"stat"},
 	)
@@ -31,7 +30,7 @@ func (g *Gauges) DatabaseReadingUsage() *prometheus.GaugeVec {
 	go func() {
 		for {
 			var readingUsage []readingUsage
-			if err := g.query(databaseReadingUsageQuery, &readingUsage, emptyParams); err == nil {
+			if err := n.Db.Query(databaseReadingUsageQuery, &readingUsage); err == nil {
 				for _, database := range readingUsage {
 					gauge.With(prometheus.Labels{
 						"stat": "tup_fetched",
@@ -41,7 +40,7 @@ func (g *Gauges) DatabaseReadingUsage() *prometheus.GaugeVec {
 					}).Set(database.TuplesReturned)
 				}
 			}
-			time.Sleep(g.interval)
+			time.Sleep(n.Interval)
 		}
 	}()
 	return gauge
