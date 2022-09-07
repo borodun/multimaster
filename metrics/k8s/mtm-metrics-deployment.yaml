@@ -41,15 +41,13 @@ spec:
               readOnly: true
       volumes:
         - name: config
-          secret:
-            secretName: mtm-metrics-config
+          configMap:
+            name: mtm-metrics-config
             optional: false
+        - name: hosts
+          configMap:
+            name: mtm-metrics-hosts
         - name: pgpass
           secret:
             secretName: mtm-metrics-pgpass
-            optional: false
             defaultMode: 0600
-        - name: hosts
-          secret:
-            optional: false
-            secretName: mtm-metrics-hosts
