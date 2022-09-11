@@ -35,12 +35,14 @@ You need to have K8s with Prometheus and Grafana,
 see [how to make one](https://github.com/borodun/k8s-manifests#bare-metal-kubernetes-for-working). You need to
 install [Statusmap](https://grafana.com/grafana/plugins/flant-statusmap-panel/) plugin for Grafana.
 
+Create namespace and config that will be mounted to container:
+
 ```shell
 kubectl create namespace mtm
 kubectl create configmap mtm-metrics-config -n mtm --from-file=config.yaml=config.yaml
 ```
 
-If needed, create _pgpass_ and _hosts_:
+If needed, create _pgpass_ and _hosts_ that will be mounted to container:
 
 ```shell
 kubectl create secret generic mtm-metrics-pgpass -n mtm --from-file=.pgpass=$HOME/.pgpass
