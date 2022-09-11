@@ -14,8 +14,8 @@ from ~/.pgpass
 
 1. For now, it works only in local network with multimaster, because it needs to discover other nodes that are in the
    cluster
-2. For now, name of the database in config should be in format 'node{**id**}' (example: node**1**), where id is the id of this node in the
-   cluster (sql: SELECT my_node_id FROM mtm.status())
+2. To avoid naming conflicts, name of the database in config should be in format 'node{**id**}' (example: node**1**),
+   where id is the id of this node in the cluster (sql: SELECT my_node_id FROM mtm.status())
 
 ### Building from source
 
