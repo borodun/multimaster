@@ -6,9 +6,9 @@ Metrics are based on [postgres_exporter](https://github.com/ContaAzul/postgresql
 ## Usage
 
 You can [compile it yourself](#building-from-source), run in [container](#running-container)
-or [Kubernetes](#running-in-kubernetes). To run it you need to write a config, see [example](config.yaml). You need to
-specify at least one node that is in the cluster and online. If password isn't present in config then it
-will try to get it from ~/.pgpass
+or [Kubernetes](#running-in-kubernetes). To run it you need to write a config, see [example](config.yaml). Specify at
+least one node that is in the cluster and online. If password isn't present in config then it will try to get it
+from ~/.pgpass
 
 #### Restrictions
 
@@ -57,12 +57,13 @@ kubectl apply -f k8s/mtm-metrics-deployment.yaml -n mtm
 ```
 
 Deploy PodMonitor for _mtm-metrics_ if you
-installed [Prometheus operator](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
-Helm chart.
-See [docs](https://docs.openshift.com/container-platform/4.11/rest_api/monitoring_apis/podmonitor-monitoring-coreos-com-v1.html)
+installed [Prometheus operator](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack):
 
 ```shell
 kubectl apply -f k8s/mtm-metrics-pod-monitor.yaml -n mtm
 ```
+
+For additional
+configuration [PodMonitor docs](https://docs.openshift.com/container-platform/4.11/rest_api/monitoring_apis/podmonitor-monitoring-coreos-com-v1.html)
 
 Open Grafana in browser and import [dashboard](grafana/nodes.json)
