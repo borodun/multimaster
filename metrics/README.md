@@ -55,4 +55,15 @@ Deploy _mtm-metrics_:
 kubectl apply -f k8s/mtm-metrics-deployment.yaml -n mtm
 ```
 
+Deploy PodMonitor for _mtm-metrics_ if you
+installed [Prometheus operator](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
+Helm chart.
+See [docs](https://docs.openshift.com/container-platform/4.11/rest_api/monitoring_apis/podmonitor-monitoring-coreos-com-v1.html)
+
+```shell
+kubectl apply -f k8s/mtm-metrics-pod-monitor.yaml -n mtm
+```
+
+Open Grafana in browser and import [dashboard](grafana/nodes.json)
+
 Metrics are based on [postgres_exporter](https://github.com/ContaAzul/postgresql_exporter)
