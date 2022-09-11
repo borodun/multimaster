@@ -5,8 +5,8 @@ Metrics for Postgres multimaster cluster.
 ## Usage
 
 You can [compile it yourself](#building-from-source), run in [container](#running-container)
-or [Kubernetes](#running-in-kubernetes). . To run it you need to write a config, see [example](config.yaml). In config
-you need to specify at least one node that is in the cluster and online. If password isn't present in config then it
+or [Kubernetes](#running-in-kubernetes). To run it you need to write a config, see [example](config.yaml). You need to
+specify at least one node that is in the cluster and online. If password isn't present in config then it
 will try to get it from ~/.pgpass
 
 #### Restrictions
@@ -21,7 +21,6 @@ will try to get it from ~/.pgpass
 ```shell
 make
 ./mtm-metrics
-./mtm-metrics -c path/to/config.yaml
 ```
 
 ### Running container
@@ -32,11 +31,25 @@ docker run -p 8080:8080 -v $(pwd)/config.yaml:/home/mmts/config.yaml -v $HOME/.p
 
 ### Running in Kubernetes
 
+You need to have K8s with Prometheus and Grafana,
+see [how to make one](https://github.com/borodun/k8s-manifests#bare-metal-kubernetes-for-working). You need to
+install [Statusmap](https://grafana.com/grafana/plugins/flant-statusmap-panel/) plugin for Grafana.
+
 ```shell
 kubectl create namespace mtm
-kubectl create secret generic mtm-metrics-pgpass -n mtm --from-file=.pgpass=$HOME/.pgpass
 kubectl create configmap mtm-metrics-config -n mtm --from-file=config.yaml=config.yaml
+```
+
+If needed, create _pgpass_ and _hosts_:
+
+```shell
+kubectl create secret generic mtm-metrics-pgpass -n mtm --from-file=.pgpass=$HOME/.pgpass
 kubectl create configmap mtm-metrics-hosts -n mtm --from-file=hosts=/etc/hosts
+```
+
+Deploy _mtm-metrics_:
+
+```shell
 kubectl apply -f k8s/mtm-metrics-deployment.yaml -n mtm
 ```
 
