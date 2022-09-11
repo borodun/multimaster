@@ -1,6 +1,7 @@
 # Multimaster metrics
 
 Metrics for Postgres multimaster cluster.
+Metrics are based on [postgres_exporter](https://github.com/ContaAzul/postgresql_exporter)
 
 ## Usage
 
@@ -65,5 +66,3 @@ kubectl apply -f k8s/mtm-metrics-pod-monitor.yaml -n mtm
 ```
 
 Open Grafana in browser and import [dashboard](grafana/nodes.json)
-
-Metrics are based on [postgres_exporter](https://github.com/ContaAzul/postgresql_exporter)
