@@ -12,7 +12,7 @@ from ~/.pgpass
 
 #### Restrictions
 
-1. For now, it works only in local network with multimaster, because it needs to discover new nodes that will join the
+1. For now, it works only in local network with multimaster, because it needs to discover other nodes that are in the
    cluster
 2. For now, name of the database in config should be in format 'node{id}', where id is the id of this node in the
    cluster (sql: SELECT my_node_id FROM mtm.status())
