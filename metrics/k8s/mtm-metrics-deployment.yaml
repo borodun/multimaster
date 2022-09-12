@@ -13,10 +13,6 @@ spec:
     metadata:
       labels:
         app: mtm-metrics
-        prometheus.deckhouse.io/custom-target: mtm-metrics
-      annotations:
-        prometheus.deckhouse.io/port: "8080"
-        prometheus.deckhouse.io/sample-limit: "5000"
     spec:
       securityContext:
         runAsUser: 1000
@@ -26,7 +22,8 @@ spec:
         - name: mtm-metrics
           image: borodun/mtm-metrics
           ports:
-            - containerPort: 8080
+            - name: metrics
+              containerPort: 8080
           volumeMounts:
             - name: config
               mountPath: /home/mmts/config.yaml
@@ -41,15 +38,13 @@ spec:
               readOnly: true
       volumes:
         - name: config
-          secret:
-            secretName: mtm-metrics-config
+          configMap:
+            name: mtm-metrics-config
             optional: false
+        - name: hosts
+          configMap:
+            name: mtm-metrics-hosts
         - name: pgpass
           secret:
             secretName: mtm-metrics-pgpass
-            optional: false
             defaultMode: 0600
-        - name: hosts
-          secret:
-            optional: false
-            secretName: mtm-metrics-hosts

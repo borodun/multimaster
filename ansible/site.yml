@@ -29,6 +29,13 @@
       shell: /bin/bash
       password: $6$uSe5/bgoRHyCJV22$RgSG1ZI5T/49iL8LP6a1eA32vYNvTD/t.bFWrMVo60IonMqjZv.DVGTceSvCg413iskR/uZsjDVu5QyZN2Tto0
 
+  - name: Set public key for postgres user
+    authorized_key:
+      user: postgres
+      state: present
+      key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+      exclusive: True
+
   - name: Add postgres to sudoers
     shell: sudo usermod -aG sudo postgres
 
