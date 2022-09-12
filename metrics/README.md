@@ -8,7 +8,7 @@ Metrics are based on [postgres_exporter](https://github.com/ContaAzul/postgresql
 You can [compile it yourself](#building-from-source), run in [container](#running-container)
 or [Kubernetes](#running-in-kubernetes). To run it you need to write a config, see [example](config.yaml). Specify at
 least one node that is in the cluster and online. If password isn't present in config then it will try to get it
-from ~/.pgpass
+from ~/.pgpass. Metrics will be available on [localhost:8080/metrics](http://localhost:8080/metrics)
 
 #### Restrictions
 
