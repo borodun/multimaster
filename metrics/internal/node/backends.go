@@ -58,6 +58,10 @@ func (n *Node) BackendsByState() *prometheus.GaugeVec {
 		[]string{"state"},
 	)
 
+	if n.removed {
+		return gauge
+	}
+
 	const backendsByStateQuery = `
 		SELECT COUNT(*) AS total, COALESCE(state, 'null') as state
 		FROM pg_stat_activity
@@ -67,6 +71,10 @@ func (n *Node) BackendsByState() *prometheus.GaugeVec {
 
 	go func() {
 		for {
+			if n.removed {
+				return
+			}
+
 			gauge.Reset()
 			var backendsByState []backendsByState
 			if err := n.Db.Query(backendsByStateQuery, &backendsByState); err == nil {
@@ -100,6 +108,10 @@ func (n *Node) BackendsByUserAndClientAddress() *prometheus.GaugeVec {
 		[]string{"user", "client_addr"},
 	)
 
+	if n.removed {
+		return gauge
+	}
+
 	const backendsByUserAndClientAddressQuery = `
 		SELECT
 		  COUNT(*) AS total,
@@ -112,6 +124,10 @@ func (n *Node) BackendsByUserAndClientAddress() *prometheus.GaugeVec {
 
 	go func() {
 		for {
+			if n.removed {
+				return
+			}
+
 			gauge.Reset()
 			var backendsByUserAndClientAddress []backendsByUserAndClientAddress
 			if err := n.Db.Query(backendsByUserAndClientAddressQuery, &backendsByUserAndClientAddress); err == nil {
@@ -166,8 +182,16 @@ func (n *Node) BackendsByWaitEventType() *prometheus.GaugeVec {
 		[]string{"wait_event_type"},
 	)
 
+	if n.removed {
+		return gauge
+	}
+
 	go func() {
 		for {
+			if n.removed {
+				return
+			}
+
 			gauge.Reset()
 			var backendsByWaitEventType []backendsByWaitEventType
 			if err := n.Db.Query(n.backendsByWaitEventTypeQuery(), &backendsByWaitEventType); err == nil {

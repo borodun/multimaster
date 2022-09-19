@@ -10,7 +10,7 @@ or [Kubernetes](#running-in-kubernetes). To run it you need to write a config, s
 least one node that is in the cluster and online. If password isn't present in config then it will try to get it
 from ~/.pgpass. Metrics will be available on [localhost:8080/metrics](http://localhost:8080/metrics)
 
-#### Restrictions
+#### Current limitations
 
 1. For now, it works only in local network with multimaster, because it needs to discover other nodes that are in the
    cluster

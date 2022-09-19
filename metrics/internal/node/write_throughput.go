@@ -21,6 +21,10 @@ func (n *Node) DatabaseWritingUsage() *prometheus.GaugeVec {
 		[]string{"stat"},
 	)
 
+	if n.removed {
+		return gauge
+	}
+
 	const databaseWritingUsageQuery = `
 		SELECT COALESCE(tup_inserted, 0) as tup_inserted, 
 			COALESCE(tup_updated, 0) as tup_updated,
@@ -31,6 +35,10 @@ func (n *Node) DatabaseWritingUsage() *prometheus.GaugeVec {
 
 	go func() {
 		for {
+			if n.removed {
+				return
+			}
+
 			var writingUsage []writingUsage
 			if err := n.Db.Query(databaseWritingUsageQuery, &writingUsage); err == nil {
 				for _, database := range writingUsage {

@@ -24,6 +24,10 @@ func (n *Node) ReplicationSlotLagInBytes() *prometheus.GaugeVec {
 		[]string{"slot_name"},
 	)
 
+	if n.removed {
+		return gauge
+	}
+
 	var replicationLagQuery = fmt.Sprintf(
 		`
 						SELECT
@@ -38,6 +42,10 @@ func (n *Node) ReplicationSlotLagInBytes() *prometheus.GaugeVec {
 
 	go func() {
 		for {
+			if n.removed {
+				return
+			}
+
 			gauge.Reset()
 			var slots []slots
 			if err := n.Db.Query(replicationLagQuery, &slots); err == nil {

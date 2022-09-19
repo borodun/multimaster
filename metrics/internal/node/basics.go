@@ -19,9 +19,16 @@ func (n *Node) Up() prometheus.Gauge {
 			ConstLabels: n.Labels,
 		},
 	)
+	if n.removed {
+		return gauge
+	}
 
 	go func() {
 		for {
+			if n.removed {
+				return
+			}
+
 			var up = 1.0
 			if err := n.Db.Ping(); err != nil {
 				up = 0.0
@@ -42,9 +49,16 @@ func (n *Node) Latency() prometheus.Gauge {
 			ConstLabels: n.Labels,
 		},
 	)
+	if n.removed {
+		return gauge
+	}
 
 	go func() {
 		for {
+			if n.removed {
+				return
+			}
+
 			start := time.Now()
 			var ret []string
 			err := n.Db.Query("SELECT 1", &ret)

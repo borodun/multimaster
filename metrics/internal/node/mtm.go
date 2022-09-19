@@ -2,6 +2,7 @@ package node
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
@@ -19,7 +20,7 @@ func (n *Node) MtmStatus() *prometheus.GaugeVec {
 		ConstLabels: n.Labels,
 	}, []string{"status"})
 
-	if !n.mmts {
+	if !n.mmts || n.removed {
 		return gauge
 	}
 
@@ -36,7 +37,13 @@ func (n *Node) MtmStatus() *prometheus.GaugeVec {
 	}
 
 	go func() {
+		log.Info("status: starting goroutine")
 		for {
+			if n.removed {
+				log.WithField("name", n.Name).Info("status: returning from goroutine")
+				return
+			}
+
 			var status []statusTup
 			err := n.Db.Query(mtmNodeStatusQuery, &status)
 
@@ -72,14 +79,20 @@ func (n *Node) MtmGenNum() prometheus.Gauge {
 		ConstLabels: n.Labels,
 	})
 
-	if !n.mmts {
+	if !n.mmts || n.removed {
 		return gauge
 	}
 
 	const genNumQuery = `SELECT gen_num FROM mtm.status()`
 
 	go func() {
+		log.Info("gen: starting goroutine")
 		for {
+			if n.removed {
+				log.WithField("name", n.Name).Info("gen: returning from goroutine")
+				return
+			}
+
 			var genNum []float64
 			if err := n.Db.Query(genNumQuery, &genNum); err == nil {
 				gauge.Set(genNum[0])

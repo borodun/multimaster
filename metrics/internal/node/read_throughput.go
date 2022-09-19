@@ -20,6 +20,10 @@ func (n *Node) DatabaseReadingUsage() *prometheus.GaugeVec {
 		[]string{"stat"},
 	)
 
+	if n.removed {
+		return gauge
+	}
+
 	const databaseReadingUsageQuery = `
 		SELECT COALESCE(tup_returned, 0) as tup_returned, 
 			COALESCE(tup_fetched, 0) as tup_fetched
@@ -29,6 +33,10 @@ func (n *Node) DatabaseReadingUsage() *prometheus.GaugeVec {
 
 	go func() {
 		for {
+			if n.removed {
+				return
+			}
+
 			var readingUsage []readingUsage
 			if err := n.Db.Query(databaseReadingUsageQuery, &readingUsage); err == nil {
 				for _, database := range readingUsage {

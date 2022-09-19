@@ -20,7 +20,7 @@ type Cluster struct {
 }
 
 func (c *Cluster) AddNode(name, connInfo string) {
-	var dbLog = log.WithField("conn", name)
+	var dbLog = log.WithField("name", name)
 
 	if c.commonConnInfo == "" {
 		c.commonConnInfo = connInfo
@@ -41,9 +41,19 @@ func (c *Cluster) AddNode(name, connInfo string) {
 	nd := node.NewNode(name, dbx, c.Interval)
 	c.Nodes = append(c.Nodes, nd)
 
-	dbLog.Info("node added")
-
 	nd.StartMonitoring()
+}
+
+func (c *Cluster) RemoveNode(id int) {
+	var newNodes []node.Node
+	for _, n := range c.Nodes {
+		if n.GetID() == id {
+			n.StopMonitoring()
+			break
+		}
+		newNodes = append(newNodes, n)
+	}
+	c.Nodes = newNodes
 }
 
 func (c *Cluster) getFieldFromConnInfo(connInfo, field string) string {
@@ -72,4 +82,39 @@ func (c *Cluster) mergeConnInfos(connInfos ...string) string {
 		ret = append(ret, fmt.Sprintf("%s=%s", key, value))
 	}
 	return strings.Join(ret, " ")
+}
+
+func (c *Cluster) getConnectedNodes() []node.MtmNode {
+	var nodes []node.MtmNode
+	for _, n := range c.Nodes {
+		mn := node.MtmNode{
+			Name:   n.Name,
+			Id:     n.GetID(),
+			Status: n.GetStatus(),
+		}
+		nodes = append(nodes, mn)
+	}
+	return nodes
+}
+
+func (c *Cluster) getActualNodes() (*[]node.MtmNode, error) {
+	onlineNodes := false
+	var err error
+	for _, n := range c.Nodes {
+		status := n.GetStatus()
+
+		if status == "online" {
+			onlineNodes = true
+			nodes, err := n.GetMtmNodes()
+			if err == nil {
+				return &nodes, nil
+			}
+		}
+	}
+
+	if !onlineNodes {
+		return nil, fmt.Errorf("no online nodes")
+	}
+
+	return nil, err
 }

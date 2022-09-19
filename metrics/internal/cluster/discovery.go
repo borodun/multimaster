@@ -7,12 +7,6 @@ import (
 	"time"
 )
 
-type NodeStatus struct {
-	Name   string
-	Id     int
-	Status string
-}
-
 func (c *Cluster) StartNodeDiscovery() {
 	go func() {
 		for {
@@ -23,48 +17,56 @@ func (c *Cluster) StartNodeDiscovery() {
 }
 
 func (c *Cluster) discoverNodes() {
-	var nodeStatuses []NodeStatus
-	var mtmNodes []node.MtmNodes
-
-	for _, n := range c.Nodes {
-		id := n.GetID()
-		status := n.GetStatus()
-
-		if status == "online" && len(mtmNodes) == 0 {
-			nodes, err := n.GetMtmNodes()
-			if err == nil {
-				mtmNodes = nodes
-			}
-		}
-
-		ns := NodeStatus{
-			Name:   n.Name,
-			Id:     id,
-			Status: status,
-		}
-		nodeStatuses = append(nodeStatuses, ns)
+	connectedNodes := c.getConnectedNodes()
+	actualNodes, err := c.getActualNodes()
+	if err != nil {
+		log.WithError(err).Warn("discovery: couldn't retrieve nodes in cluster")
+		return
+	}
+	if len(*actualNodes) == 0 {
+		log.Warn("discovery: no nodes retrieved")
+		return
 	}
 
-	connected := make(map[int]bool)
-
-	for _, mtmNode := range mtmNodes {
-		for _, status := range nodeStatuses {
-			if mtmNode.Id == status.Id {
-				connected[mtmNode.Id] = true
-				break
-			}
+	// Adding nodes
+	for _, mtmNode := range *actualNodes {
+		found := findById(connectedNodes, mtmNode.Id)
+		if found {
+			continue
 		}
-		if connected[mtmNode.Id] {
+		if !(mtmNode.Connected && mtmNode.Enabled) {
 			continue
 		}
 
-		log.Infof("discovered new node, id: %d", mtmNode.Id)
-		c.AddNode(fmt.Sprintf("node%d", mtmNode.Id), mtmNode.ConnInfo)
+		name := c.getNodeName(connectedNodes, mtmNode.Id)
+		log.WithField("id", mtmNode.Id).
+			WithField("name", name).Infof("discovered new node")
+		c.AddNode(name, mtmNode.ConnInfo)
+	}
+
+	// Removing nodes
+	for _, connectedNode := range connectedNodes {
+		found := findById(*actualNodes, connectedNode.Id)
+		if found {
+			continue
+		}
+
+		log.Infof("node '%s' not in the cluster, removing", connectedNode.Name)
+		c.RemoveNode(connectedNode.Id)
 	}
 }
 
-func (c *Cluster) getNodeName(nodeStatuses []NodeStatus, id int) string {
-	name := fmt.Sprintf("nodeStatus%d", id)
+func findById(nodes []node.MtmNode, id int) bool {
+	for _, n := range nodes {
+		if n.Id == id {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Cluster) getNodeName(nodeStatuses []node.MtmNode, id int) string {
+	name := fmt.Sprintf("node%d", id)
 	nameTaken := false
 	max := 0
 	for _, nodeStatus := range nodeStatuses {
@@ -80,5 +82,8 @@ func (c *Cluster) getNodeName(nodeStatuses []NodeStatus, id int) string {
 		return name
 	}
 
-	return fmt.Sprintf("nodeStatus%d", max+1)
+	newName := fmt.Sprintf("node%d", max+1)
+	log.Infof("node name '%s' is already taken, new node will have '%s' name", name, newName)
+
+	return newName
 }

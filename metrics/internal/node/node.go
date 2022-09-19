@@ -15,7 +15,8 @@ type Node struct {
 	Interval time.Duration
 	Labels   map[string]string
 
-	mmts bool
+	mmts    bool
+	removed bool
 }
 
 func NewNode(name string, db database.Database, interval time.Duration) Node {
@@ -32,6 +33,8 @@ func (n *Node) StartMonitoring() {
 	reg := prometheus.DefaultRegisterer
 
 	n.CheckMultimaster()
+
+	//ctx, cancel := context.WithCancel(context.Background())
 
 	reg.MustRegister(n.MtmStatus())
 	reg.MustRegister(n.MtmGenNum())
@@ -51,6 +54,30 @@ func (n *Node) StartMonitoring() {
 	log.WithField("conn", n.Name).Info("started monitoring")
 }
 
+func (n *Node) StopMonitoring() {
+	reg := prometheus.DefaultRegisterer
+
+	reg.Unregister(n.MtmStatus())
+	reg.Unregister(n.MtmGenNum())
+	reg.Unregister(n.Latency())
+	reg.Unregister(n.ConnectedBackends())
+	reg.Unregister(n.Up())
+	reg.Unregister(n.ReplicationSlotLagInBytes())
+	reg.Unregister(n.DatabaseReadingUsage())
+	reg.Unregister(n.DatabaseWritingUsage())
+	reg.Unregister(n.Size())
+	reg.Unregister(n.BackendsByState())
+	reg.Unregister(n.BackendsByUserAndClientAddress())
+	reg.Unregister(n.TransactionsSum())
+	reg.Unregister(n.TransactionsCommitSum())
+	reg.Unregister(n.TransactionsRollbackSum())
+
+	n.removed = true
+	n.Db.Disconnect()
+
+	log.WithField("conn", n.Name).Info("stopped monitoring")
+}
+
 func paramsFix(params []string) []interface{} {
 	iparams := make([]interface{}, len(params))
 	for i, v := range params {
@@ -61,12 +88,12 @@ func paramsFix(params []string) []interface{} {
 
 func (n *Node) new(opts prometheus.GaugeOpts, query string, params ...string) prometheus.Gauge {
 	var gauge = prometheus.NewGauge(opts)
+	if n.removed {
+		return gauge
+	}
+
 	go n.observe(gauge, query, paramsFix(params))
 	return gauge
-}
-
-func (n *Node) fromOnce(gauge prometheus.Gauge, query string, params ...string) {
-	go n.observeOnce(gauge, query, paramsFix(params))
 }
 
 func (n *Node) observeOnce(gauge prometheus.Gauge, query string, params []interface{}) {
@@ -79,6 +106,10 @@ func (n *Node) observeOnce(gauge prometheus.Gauge, query string, params []interf
 
 func (n *Node) observe(gauge prometheus.Gauge, query string, params []interface{}) {
 	for {
+		if n.removed {
+			return
+		}
+
 		n.observeOnce(gauge, query, params)
 		time.Sleep(n.Interval)
 	}
@@ -150,15 +181,19 @@ func (n *Node) GetID() int {
 	return status[0].Id
 }
 
-type MtmNodes struct {
-	Id       int    `db:"id"`
-	ConnInfo string `db:"conninfo"`
+type MtmNode struct {
+	Id        int    `db:"id"`
+	ConnInfo  string `db:"conninfo"`
+	Enabled   bool   `db:"enabled"`
+	Connected bool   `db:"connected"`
+	Name      string
+	Status    string
 }
 
-func (n *Node) GetMtmNodes() ([]MtmNodes, error) {
-	const mtmNodesQuery = `SELECT id, conninfo FROM mtm.nodes()`
+func (n *Node) GetMtmNodes() ([]MtmNode, error) {
+	const mtmNodesQuery = `SELECT id, conninfo, enabled, connected FROM mtm.nodes()`
 
-	var nodes []MtmNodes
+	var nodes []MtmNode
 	err := n.Db.Query(mtmNodesQuery, &nodes)
 
 	return nodes, err

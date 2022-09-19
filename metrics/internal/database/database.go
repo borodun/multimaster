@@ -24,6 +24,14 @@ func NewDatabase(name string, db *sql.DB, timeout time.Duration) Database {
 	}
 }
 
+func (d *Database) Disconnect() {
+	err := d.db.Close()
+	if err != nil {
+		log.WithField("name", d.name).
+			WithError(err).Errorf("error occured while disconnecting from database")
+	}
+}
+
 func (d *Database) HasSharedPreloadLibrary(lib string) bool {
 	var libs []string
 	if err := d.Query("SHOW shared_preload_libraries", &libs); err != nil {
@@ -95,7 +103,7 @@ func (d *Database) queryWithTimeout(
 			q = q[:50] + "..."
 		}
 		log.WithError(err).
-			WithField("conn", d.name).
+			WithField("name", d.name).
 			WithField("query", q).
 			WithField("params", params).
 			Error("query failed")
