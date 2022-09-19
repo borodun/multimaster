@@ -1,10 +1,10 @@
 # multimaster
 Postgres multimaster \
-Deploy modified postgres on 6 nodes and start 2 multimaster clusters on them:
+Deploy modified postgres on nodes and start multimaster clusters on them + anable monitoring:
 ```shell
-ansible-playbook site.yml -i hosts -f 6 --ask-become-pass -t prepare,build,install,clusters
+ansible-playbook site.yml -i hosts -f 10 -t prepare,build,install,clusters,monitoring,checkmm
 ```
-_BECOME password_ is password for _postgres_ user on hosts (1234) \
+Note: change password for _postgres_ user in site.yml 
 
 Start/stop/status postgres
 ```shel
@@ -16,7 +16,7 @@ Other tags
 ansible-playbook site.yml --list-tags
 ```
 
-Check multimasters on node0 and node3:
+Check multimasters on node0:
 ```shell
 psql -U mtmuser -d mydb
 ```
