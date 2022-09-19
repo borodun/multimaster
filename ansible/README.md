@@ -1,6 +1,6 @@
 # multimaster
 Postgres multimaster \
-Deploy modified postgres on nodes and start multimaster clusters on them + anable monitoring:
+Deploy modified postgres on nodes and start multimaster clusters on them + enable monitoring:
 ```shell
 ansible-playbook site.yml -i hosts -f 10 -t prepare,build,install,clusters,monitoring,checkmm
 ```
@@ -8,7 +8,7 @@ Note: change password for _postgres_ user in site.yml
 
 Start/stop/status postgres
 ```shel
-ansible-playbook site.yml -i hosts -f 6 -t start/stop/status
+ansible-playbook site.yml -i hosts -f 10 -t start/stop/status
 ```
 
 Other tags
