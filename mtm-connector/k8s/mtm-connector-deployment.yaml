@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mtm-connector-deployment
+  labels:
+    app: mtm-connector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mtm-connector
+  template:
+    metadata:
+      labels:
+        app: mtm-connector
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: mtm-connector
+          image: borodun/mtm-connector
+          args: ["-u", "postgresql://mtmuser@10.10.10.81:5432/mydb?sslmode=disable"]
+          ports:
+            - name: api
+              containerPort: 8080
+          volumeMounts:
+            - name: pgpass
+              mountPath: /home/mmts/.pgpass
+              subPath: .pgpass
+              readOnly: true
+      volumes:
+        - name: pgpass
+          secret:
+            secretName: mtm-connector-pgpass
+            defaultMode: 0600
