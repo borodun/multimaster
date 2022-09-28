@@ -21,7 +21,7 @@ func (n *Node) DatabaseWritingUsage() *prometheus.GaugeVec {
 		[]string{"stat"},
 	)
 
-	if n.removed {
+	if n.ctx.Err() != nil {
 		return gauge
 	}
 
@@ -35,7 +35,7 @@ func (n *Node) DatabaseWritingUsage() *prometheus.GaugeVec {
 
 	go func() {
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				return
 			}
 

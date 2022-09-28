@@ -1,11 +1,13 @@
 package node
 
 import (
+	"context"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"metrics/internal/database"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -15,8 +17,11 @@ type Node struct {
 	Interval time.Duration
 	Labels   map[string]string
 
-	mmts    bool
-	removed bool
+	mmts bool
+
+	ctx    context.Context
+	cancel context.CancelFunc
+	wg     *sync.WaitGroup
 }
 
 func NewNode(name string, db database.Database, interval time.Duration) Node {
@@ -29,26 +34,42 @@ func NewNode(name string, db database.Database, interval time.Duration) Node {
 }
 
 func (n *Node) StartMonitoring() {
-
 	reg := prometheus.DefaultRegisterer
 
 	n.CheckMultimaster()
 
-	//ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	n.ctx = ctx
+	n.cancel = cancel
+	n.wg = &sync.WaitGroup{}
 
+	n.wg.Add(1)
 	reg.MustRegister(n.MtmStatus())
+	n.wg.Add(1)
 	reg.MustRegister(n.MtmGenNum())
+	//n.wg.Add(1)
 	reg.MustRegister(n.Latency())
+	//n.wg.Add(1)
 	reg.MustRegister(n.ConnectedBackends())
+	//n.wg.Add(1)
 	reg.MustRegister(n.Up())
+	//n.wg.Add(1)
 	reg.MustRegister(n.ReplicationSlotLagInBytes())
+	//n.wg.Add(1)
 	reg.MustRegister(n.DatabaseReadingUsage())
+	//n.wg.Add(1)
 	reg.MustRegister(n.DatabaseWritingUsage())
+	//n.wg.Add(1)
 	reg.MustRegister(n.Size())
+	//n.wg.Add(1)
 	reg.MustRegister(n.BackendsByState())
+	//n.wg.Add(1)
 	reg.MustRegister(n.BackendsByUserAndClientAddress())
+	//n.wg.Add(1)
 	reg.MustRegister(n.TransactionsSum())
+	//n.wg.Add(1)
 	reg.MustRegister(n.TransactionsCommitSum())
+	//n.wg.Add(1)
 	reg.MustRegister(n.TransactionsRollbackSum())
 
 	log.WithField("conn", n.Name).Info("started monitoring")
@@ -56,6 +77,8 @@ func (n *Node) StartMonitoring() {
 
 func (n *Node) StopMonitoring() {
 	reg := prometheus.DefaultRegisterer
+
+	n.cancel()
 
 	reg.Unregister(n.MtmStatus())
 	reg.Unregister(n.MtmGenNum())
@@ -72,7 +95,8 @@ func (n *Node) StopMonitoring() {
 	reg.Unregister(n.TransactionsCommitSum())
 	reg.Unregister(n.TransactionsRollbackSum())
 
-	n.removed = true
+	n.wg.Wait()
+
 	n.Db.Disconnect()
 
 	log.WithField("conn", n.Name).Info("stopped monitoring")
@@ -88,7 +112,7 @@ func paramsFix(params []string) []interface{} {
 
 func (n *Node) new(opts prometheus.GaugeOpts, query string, params ...string) prometheus.Gauge {
 	var gauge = prometheus.NewGauge(opts)
-	if n.removed {
+	if n.ctx.Err() != nil {
 		return gauge
 	}
 
@@ -106,7 +130,7 @@ func (n *Node) observeOnce(gauge prometheus.Gauge, query string, params []interf
 
 func (n *Node) observe(gauge prometheus.Gauge, query string, params []interface{}) {
 	for {
-		if n.removed {
+		if n.ctx.Err() != nil {
 			return
 		}
 

@@ -24,7 +24,7 @@ func (n *Node) ReplicationSlotLagInBytes() *prometheus.GaugeVec {
 		[]string{"slot_name"},
 	)
 
-	if n.removed {
+	if n.ctx.Err() != nil {
 		return gauge
 	}
 
@@ -42,7 +42,7 @@ func (n *Node) ReplicationSlotLagInBytes() *prometheus.GaugeVec {
 
 	go func() {
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				return
 			}
 

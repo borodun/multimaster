@@ -20,7 +20,7 @@ func (n *Node) MtmStatus() *prometheus.GaugeVec {
 		ConstLabels: n.Labels,
 	}, []string{"status"})
 
-	if !n.mmts || n.removed {
+	if !n.mmts || n.ctx.Err() != nil {
 		return gauge
 	}
 
@@ -37,9 +37,9 @@ func (n *Node) MtmStatus() *prometheus.GaugeVec {
 	}
 
 	go func() {
-		log.Info("status: starting goroutine")
+		defer n.wg.Done()
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				log.WithField("name", n.Name).Info("status: returning from goroutine")
 				return
 			}
@@ -79,16 +79,16 @@ func (n *Node) MtmGenNum() prometheus.Gauge {
 		ConstLabels: n.Labels,
 	})
 
-	if !n.mmts || n.removed {
+	if !n.mmts || n.ctx.Err() != nil {
 		return gauge
 	}
 
 	const genNumQuery = `SELECT gen_num FROM mtm.status()`
 
 	go func() {
-		log.Info("gen: starting goroutine")
+		defer n.wg.Done()
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				log.WithField("name", n.Name).Info("gen: returning from goroutine")
 				return
 			}

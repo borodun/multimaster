@@ -58,7 +58,7 @@ func (n *Node) BackendsByState() *prometheus.GaugeVec {
 		[]string{"state"},
 	)
 
-	if n.removed {
+	if n.ctx.Err() != nil {
 		return gauge
 	}
 
@@ -71,7 +71,7 @@ func (n *Node) BackendsByState() *prometheus.GaugeVec {
 
 	go func() {
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				return
 			}
 
@@ -108,7 +108,7 @@ func (n *Node) BackendsByUserAndClientAddress() *prometheus.GaugeVec {
 		[]string{"user", "client_addr"},
 	)
 
-	if n.removed {
+	if n.ctx.Err() != nil {
 		return gauge
 	}
 
@@ -124,7 +124,7 @@ func (n *Node) BackendsByUserAndClientAddress() *prometheus.GaugeVec {
 
 	go func() {
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				return
 			}
 
@@ -182,13 +182,13 @@ func (n *Node) BackendsByWaitEventType() *prometheus.GaugeVec {
 		[]string{"wait_event_type"},
 	)
 
-	if n.removed {
+	if n.ctx.Err() != nil {
 		return gauge
 	}
 
 	go func() {
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				return
 			}
 

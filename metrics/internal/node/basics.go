@@ -19,13 +19,13 @@ func (n *Node) Up() prometheus.Gauge {
 			ConstLabels: n.Labels,
 		},
 	)
-	if n.removed {
+	if n.ctx.Err() != nil {
 		return gauge
 	}
 
 	go func() {
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				return
 			}
 
@@ -49,13 +49,13 @@ func (n *Node) Latency() prometheus.Gauge {
 			ConstLabels: n.Labels,
 		},
 	)
-	if n.removed {
+	if n.ctx.Err() != nil {
 		return gauge
 	}
 
 	go func() {
 		for {
-			if n.removed {
+			if n.ctx.Err() != nil {
 				return
 			}
 
