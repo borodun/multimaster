@@ -8,7 +8,7 @@ import (
 )
 
 func (j *Joiner) backupNodeAndGetLSN(connStr string) string {
-	cmdStr := fmt.Sprintf("pg_basebackup -D %s -d '%s' -c fast -v", j.PGDATA, connStr)
+	cmdStr := fmt.Sprintf("pg_basebackup -D %s -d '%s' -c fast -v 2>&1", j.PGDATA, connStr)
 
 	err := j.removePGDATA()
 	if err != nil {
@@ -25,7 +25,7 @@ func (j *Joiner) backupNodeAndGetLSN(connStr string) string {
 
 	lsn := getLSN(out)
 	if lsn == "" {
-		log.Fatal("couldn't get lsn")
+		log.WithField("out", out).Fatal("couldn't get lsn")
 	}
 	log.Infof("lsn: %s", lsn)
 

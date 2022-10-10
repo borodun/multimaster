@@ -10,6 +10,7 @@ import (
 type Joiner struct {
 	URL    string
 	PGDATA string
+	Port   string
 }
 
 func (j *Joiner) Start() {
@@ -18,7 +19,8 @@ func (j *Joiner) Start() {
 	connStr := j.addNode(localIP)
 
 	log.RegisterExitHandler(func() {
-		fmt.Println("Something went wrong: dropping node")
+		log.Info("something went wrong: dropping node")
+		j.stopPg()
 		j.dropNode(localIP)
 	})
 
@@ -27,9 +29,13 @@ func (j *Joiner) Start() {
 	j.configureBackup()
 	j.startPg()
 
-	for !j.pgIsReady() {
-		log.Infof("postgres isn't ready yet: waiting")
-		time.Sleep(100 * time.Millisecond)
+	log.Info("waiting for node to become ready")
+	for i := 0; i < 10; i++ {
+		_, err := execCmd(fmt.Sprintf("psql -U mtmuser -d mydb -p %s -c 'SELECT * FROM mtm.ping()'", j.Port))
+		if err == nil {
+			break
+		}
+		time.Sleep(3 * time.Second)
 	}
 
 	j.joinNode(localIP, lsn)

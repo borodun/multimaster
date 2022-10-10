@@ -26,7 +26,7 @@ func getConnStr(url string) string {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		log.WithField("response", body).Fatal("getting connection string: status code not 200")
+		log.WithField("response", string(body)).Fatal("getting connection string: status code not 200")
 	}
 
 	return string(body)

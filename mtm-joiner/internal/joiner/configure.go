@@ -3,6 +3,7 @@ package joiner
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"runtime"
 )
 
 func (j *Joiner) configureBackup() {
@@ -15,6 +16,10 @@ func (j *Joiner) configureBackup() {
 		`"restore_command = 'false'"`,
 		`"recovery_target = 'immediate'"`,
 		`"recovery_target_action = 'promote'"`,
+	}
+
+	if runtime.GOOS == "android" {
+		settings = append(settings, `"dynamic_shared_memory_type = 'mmap'"`)
 	}
 
 	for _, setting := range settings {

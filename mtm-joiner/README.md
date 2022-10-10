@@ -5,5 +5,5 @@ Client tool to join multimaster cluster using [API server](https://github.com/bo
 ### Usage
 
 ```shell
-./mtm-joiner -u "127.0.0.1:8080"
+./mtm-joiner -u http://127.0.0.1:8080
 ```

@@ -6,8 +6,9 @@ import (
 	"os/exec"
 )
 
-func execCmd(cmdStr string, args ...string) (string, error) {
-	cmd := exec.Command(cmdStr, args...)
+func execCmd(args ...string) (string, error) {
+	ar := append([]string{"-c"}, args...)
+	cmd := exec.Command("sh", ar...)
 
 	var o, e bytes.Buffer
 	cmd.Stdout = &o
@@ -18,9 +19,8 @@ func execCmd(cmdStr string, args ...string) (string, error) {
 	if err != nil {
 		log.WithField("stdout", o.String()).
 			WithField("stderr", e.String()).
-			WithField("cmd", cmdStr).
-			WithField("args", args).
-			WithError(err).Error("exec error")
+			WithField("cmd", cmd.Args).
+			WithError(err).Warn("exec error")
 
 		return "", err
 	}

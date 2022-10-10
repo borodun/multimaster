@@ -22,7 +22,8 @@ var rootCmd = &cobra.Command{
 
 		j := &joiner.Joiner{
 			URL:    url,
-			PGDATA: "~/db",
+			PGDATA: "./db",
+			Port:   "15432",
 		}
 		j.Start()
 	},
@@ -36,5 +37,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&url, "api-url", "u", "", "URL of API server (example: 127.0.0.1:8080)")
+	rootCmd.Flags().StringVarP(&url, "api-url", "u", "", "URL of API server (example: http://127.0.0.1:8080)")
 }

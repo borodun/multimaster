@@ -7,8 +7,8 @@ import (
 )
 
 func (j *Joiner) pgIsReady() bool {
-	out, err := execCmd("pg_isready")
-	if err != nil {
+	out, err := execCmd(fmt.Sprintf("pg_isready -p %s", j.Port))
+	if err != nil && !strings.Contains(err.Error(), "exit status 2") {
 		log.WithError(err).Fatal("pg_isready error")
 	}
 
@@ -16,7 +16,7 @@ func (j *Joiner) pgIsReady() bool {
 }
 
 func (j *Joiner) pgCtl(cmd string) {
-	c := fmt.Sprintf("pg_ctl -D %s -l %s/logfile %s", j.PGDATA, j.PGDATA, cmd)
+	c := fmt.Sprintf("pg_ctl -D %s -l %s/logfile -o '-p %s' %s", j.PGDATA, j.PGDATA, j.Port, cmd)
 	_, err := execCmd(c)
 	if err != nil {
 		log.WithError(err).
