@@ -28,7 +28,7 @@ func NewDatabase(connInfo string) Database {
 	var dbx = sqlx.NewDb(db, "postgres")
 	return Database{
 		db:      dbx,
-		timeout: 10 * time.Second,
+		timeout: 120 * time.Second,
 	}
 }
 

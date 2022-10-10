@@ -56,3 +56,31 @@ func (m *MtmConnector) mergeConnInfos(connInfos ...string) string {
 	}
 	return strings.Join(ret, " ")
 }
+
+func (m *MtmConnector) removeFromConnInfo(connInfo string, fieldsToRemove ...string) string {
+	retConnInfo := make(map[string]string)
+
+	connInfoFields := strings.Split(connInfo, " ")
+	for _, f := range connInfoFields {
+		keyValue := strings.Split(f, "=")
+		if arrContains(fieldsToRemove, keyValue[0]) {
+			continue
+		}
+		retConnInfo[keyValue[0]] = keyValue[1]
+	}
+
+	var ret []string
+	for key, value := range retConnInfo {
+		ret = append(ret, fmt.Sprintf("%s=%s", key, value))
+	}
+	return strings.Join(ret, " ")
+}
+
+func arrContains(arr []string, name string) bool {
+	for _, value := range arr {
+		if value == name {
+			return true
+		}
+	}
+	return false
+}

@@ -26,14 +26,6 @@ func (m *MtmConnector) DropNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	joined := m.Joined[host]
-	if !joined {
-		log.WithField("host", host).Errorf("drop node: node not joined for '%s' host", host)
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "node not joined for %s, you should join node firstly\n", host)
-		return
-	}
-
 	err := m.mtmDropNode(id)
 	if err != nil {
 		log.WithField("host", host).WithError(err).Error("drop node")

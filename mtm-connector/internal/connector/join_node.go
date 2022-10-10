@@ -33,27 +33,25 @@ func (m *MtmConnector) JoinNode(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "no id for %s found, you should add node firstly\n", host)
 		return
 	}
+	_, ok = m.Joined[host]
+	if !ok {
+		log.WithField("host", host).Errorf("join node: '%s' already joined", host)
+		w.WriteHeader(http.StatusAlreadyReported)
+		fmt.Fprintf(w, "%s already joined\n", host)
+		return
+	}
 
 	err := m.mtmJoinNode(id, lsn)
 	if err != nil {
 		log.WithField("host", host).WithError(err).Error("join node")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "error occurred: %s\n", err.Error())
-		fmt.Fprintln(w, "will be dropping node from cluster")
-
-		e := m.mtmDropNode(id)
-		if e != nil {
-			log.WithField("host", host).WithError(e).Error("error while dropping node")
-			fmt.Fprintf(w, "error occurred while dropping node: %s\n", e.Error())
-		}
-
-		delete(m.InProcess, host)
-		delete(m.Joined, host)
 		return
 	}
 
 	log.WithField("host", host).Infof("joined node: id: %s", id)
 
+	delete(m.InProcess, host)
 	m.Joined[host] = true
 
 	fmt.Fprintln(w, "joined node")

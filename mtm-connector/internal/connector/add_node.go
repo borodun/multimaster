@@ -30,11 +30,11 @@ func (m *MtmConnector) AddNode(w http.ResponseWriter, r *http.Request) {
 	m.InProcess[host] = id
 	m.Joined[host] = false
 
-	fmt.Fprintln(w, m.ConnInfo)
+	fmt.Fprintln(w, m.removeFromConnInfo(m.ConnInfo, "sslmode"))
 }
 
 func (m *MtmConnector) mtmAddNodeAndGetID(host string) (string, error) {
-	mtmAddNodeQuery := fmt.Sprintf(`SELECT mtm.add_node('%s')`, m.mergeConnInfos(m.ConnInfo, "host="+host))
+	mtmAddNodeQuery := fmt.Sprintf(`SELECT mtm.add_node('%s')`, m.mergeConnInfos(m.removeFromConnInfo(m.ConnInfo, "sslmode"), "host="+host, "port=15432"))
 
 	var id []string
 	err := m.Db.Query(mtmAddNodeQuery, &id)
