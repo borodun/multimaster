@@ -20,10 +20,10 @@ func Run(port, url string) {
 	connInfo, _ := pq.ParseURL(url)
 
 	mtmConnector := connector.MtmConnector{
-		Db:        database.NewDatabase(connInfo),
-		ConnInfo:  connInfo,
-		InProcess: map[string]string{},
-		Joined:    map[string]bool{},
+		Db:       database.NewDatabase(connInfo),
+		ConnInfo: connInfo,
+		Hosts:    map[string]string{},
+		Joined:   map[string]bool{},
 	}
 
 	mtmConnector.Serve(port)

@@ -18,11 +18,19 @@ func (m *MtmConnector) DropNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := m.InProcess[host]
+	id, ok := m.Hosts[host]
 	if !ok {
 		log.WithField("host", host).Errorf("drop node: no id for '%s' host", host)
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "no id for %s found, you should add node firstly\n", host)
+		return
+	}
+
+	joined := m.Joined[host]
+	if !joined {
+		log.WithField("host", host).Errorf("drop node: node '%s' not joined", host)
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "node %s not joined, you should join node firstly\n", host)
 		return
 	}
 
@@ -31,14 +39,14 @@ func (m *MtmConnector) DropNode(w http.ResponseWriter, r *http.Request) {
 		log.WithField("host", host).WithError(err).Error("drop node")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "error occurred %s\n", err.Error())
-		delete(m.InProcess, host)
+		delete(m.Hosts, host)
 		delete(m.Joined, host)
 		return
 	}
 
 	log.WithField("host", host).Infof("dropped node: id: %s", id)
 
-	delete(m.InProcess, host)
+	delete(m.Hosts, host)
 	delete(m.Joined, host)
 
 	fmt.Fprintln(w, "node dropped")

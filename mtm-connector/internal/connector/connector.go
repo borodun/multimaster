@@ -11,10 +11,10 @@ import (
 )
 
 type MtmConnector struct {
-	Db        database.Database
-	ConnInfo  string
-	InProcess map[string]string
-	Joined    map[string]bool
+	Db       database.Database
+	ConnInfo string
+	Hosts    map[string]string
+	Joined   map[string]bool
 }
 
 func (m *MtmConnector) Serve(port string) {

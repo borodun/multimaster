@@ -26,7 +26,7 @@ func (m *MtmConnector) JoinNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := m.InProcess[host]
+	id, ok := m.Hosts[host]
 	if !ok {
 		log.WithField("host", host).Errorf("join node: no id for '%s' host", host)
 		w.WriteHeader(http.StatusNotFound)
@@ -51,7 +51,6 @@ func (m *MtmConnector) JoinNode(w http.ResponseWriter, r *http.Request) {
 
 	log.WithField("host", host).Infof("joined node: id: %s", id)
 
-	delete(m.InProcess, host)
 	m.Joined[host] = true
 
 	fmt.Fprintln(w, "joined node")

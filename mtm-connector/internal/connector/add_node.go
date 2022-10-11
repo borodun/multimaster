@@ -17,6 +17,7 @@ func (m *MtmConnector) AddNode(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "no host provided")
 		return
 	}
+	m.Joined[host] = false
 
 	id, err := m.mtmAddNodeAndGetID(host)
 	if err != nil {
@@ -27,8 +28,7 @@ func (m *MtmConnector) AddNode(w http.ResponseWriter, r *http.Request) {
 	}
 	log.WithField("host", host).Infof("added node: id: %s", id)
 
-	m.InProcess[host] = id
-	m.Joined[host] = false
+	m.Hosts[host] = id
 
 	fmt.Fprintln(w, m.removeFromConnInfo(m.ConnInfo, "sslmode"))
 }
