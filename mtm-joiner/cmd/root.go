@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	url string
+	url  string
+	drop bool
 )
 
 var rootCmd = &cobra.Command{
@@ -25,7 +26,7 @@ var rootCmd = &cobra.Command{
 			PGDATA: "./db",
 			Port:   "15432",
 		}
-		j.Start()
+		j.Start(drop)
 	},
 }
 
@@ -38,4 +39,5 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().StringVarP(&url, "api-url", "u", "", "URL of API server (example: http://127.0.0.1:8080)")
+	rootCmd.Flags().BoolVarP(&drop, "drop", "d", false, "If node needs to be dropped from cluster")
 }

@@ -12,7 +12,8 @@ func (j *Joiner) backupNodeAndGetLSN(connStr string) string {
 
 	err := j.removePGDATA()
 	if err != nil {
-		log.WithError(err).Fatal("while removing PGDATA")
+		log.WithError(err).Error("while removing PGDATA")
+		return ""
 	}
 
 	log.Info("starting backup process")

@@ -13,8 +13,15 @@ type Joiner struct {
 	Port   string
 }
 
-func (j *Joiner) Start() {
+func (j *Joiner) Start(drop bool) {
 	localIP := getLocalIP()
+
+	if drop {
+		log.Info("dropping node")
+		j.stopPg()
+		j.dropNode(localIP)
+		return
+	}
 
 	connStr := j.addNode(localIP)
 
@@ -31,11 +38,11 @@ func (j *Joiner) Start() {
 
 	log.Info("waiting for node to become ready")
 	for i := 0; i < 10; i++ {
-		_, err := execCmd(fmt.Sprintf("psql -U mtmuser -d mydb -p %s -c 'SELECT * FROM mtm.ping()'", j.Port))
+		_, err := execCmd(fmt.Sprintf("psql -U mtmuser -d mydb -p %s -c 'SELECT 1'", j.Port))
 		if err == nil {
 			break
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 
 	j.joinNode(localIP, lsn)
