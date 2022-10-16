@@ -1,0 +1,94 @@
+# Info
+Deploy multimaster cluster from scratch
+
+Logs are in _mm/node*/logfile_
+
+## Usage
+You need to change **LOCAL_IP** in _conf.env_
+
+Start scenario:
+```bash
+./start_scenario.sh
+```
+
+End scenrio:
+```bash
+./end_scenario.sh
+```
+
+Other utils:
+
+```bash
+# To start or restart everything
+./restart_all.sh
+# Stop instances
+./poke_all.sh stop
+# Start instances
+./poke_all.sh start
+# Clean up after dropping node
+./clean_up.sh <node-id>
+```
+
+## By hand
+
+0. Set environment vars:
+```bash
+source conf.env
+```
+
+1. Init 3 postgres instances:
+```bash
+mkdir -p mm/node1
+mkdir -p mm/node2
+mkdir -p mm/node3
+
+initdb -D mm/node1
+initdb -D mm/node2
+initdb -D mm/node3
+```
+
+2. Copy configs to instances:
+```bash
+cp $PG_CONF mm/node1
+cp $PG_CONF mm/node2
+cp $PG_CONF mm/node3
+
+cp $PG_HBA mm/node1
+cp $PG_HBA mm/node2
+cp $PG_HBA mm/node3
+```
+
+2. Start and make 3rd node a referee:
+```bash
+pg_ctl -D mm/node3 -o "-p $REF_PORT" -l mm/node3/logfile start
+sleep 1
+psql -h localhost -p $REF_PORT -d postgres -a -c "$CREATE_USER"
+psql -h localhost -p $REF_PORT -d postgres -a -c "$CREATE_DB"
+psql -h localhost -p $REF_PORT -d $MM_DB -a -c "$INIT_REF"
+```
+
+3. Modify configs for data nodes:
+```bash
+echo "$REF_CONNCONF" >> mm/node1/postgresql.conf
+echo "$REF_CONNCONF" >> mm/node2/postgresql.conf
+```
+
+4. Start all instances:
+```bash
+pg_ctl -D mm/node1 -o "-p $MM_PORT1" -l mm/node1/logfile start
+pg_ctl -D mm/node2 -o "-p $MM_PORT2" -l mm/node2/logfile start
+```
+
+5. Create database for mm:
+```bash
+psql -h localhost -p $MM_PORT1 -d postgres -a -c "$CREATE_USER"
+psql -h localhost -p $MM_PORT2 -d postgres -a -c "$CREATE_USER"
+
+psql -h localhost -p $MM_PORT1 -d postgres -a -c "$CREATE_DB"
+psql -h localhost -p $MM_PORT2 -d postgres -a -c "$CREATE_DB"
+```
+
+6. Init mm:
+```bash
+psql -h localhost -p $MM_PORT1 -d $MM_DB -a -c "$INIT_MM"
+```
