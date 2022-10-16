@@ -6,51 +6,28 @@ services:
     entrypoint:
       - /bin/bash
       - ./scripts/entrypoint.sh
-    ports: 
-      - "${PORT1}:5432"
     networks:
-      net-2:
-        ipv4_address: 10.12.0.11
-      net-3:
-        ipv4_address: 10.13.0.11
+      mtmnet:
+        ipv4_address: $HOST1
   mtm-2:
     image: ${IMAGE}
     entrypoint:
       - /bin/bash
       - ./scripts/entrypoint.sh
-    ports: 
-      - "${PORT2}:5432"
     networks:
-      net-1:
-        ipv4_address: 10.11.0.12
-      net-3:
-        ipv4_address: 10.13.0.12
+      mtmnet:
+        ipv4_address: $HOST2
   mtm-3:
     image: ${IMAGE}
     entrypoint:
       - /bin/bash
       - ./scripts/entrypoint.sh
-    ports: 
-      - "${PORT3}:5432"
     networks:
-      net-1:
-        ipv4_address: 10.11.0.13
-      net-2:
-        ipv4_address: 10.12.0.13
+      mtmnet:
+        ipv4_address: $HOST3
 networks:
-  net-1:
+  mtmnet:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.11.0.0/24
-  net-2:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.12.0.0/24
-  net-3:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.13.0.0/24
-
+        - subnet: $SUBNET1

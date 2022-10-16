@@ -29,7 +29,8 @@ else
   "$PGROOT"/bin/pg_ctl -D "$PGROOT"/data -l "$PGROOT"/logfile start
 
   if [ -z "$IS_DB_ALREADY_INITIALIZED" ]; then
-    "$PGROOT"/bin/createdb mydb
+    "$PGROOT"/bin/createuser mtmuser -s
+    "$PGROOT"/bin/createdb mydb -O mtmuser
   fi
 
   exit 0
