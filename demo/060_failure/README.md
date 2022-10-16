@@ -2,14 +2,14 @@
 
 ### Поднятие кластера
 
-0. убеждаемся, что установлен pg13 + mtm
-1. редактируем ./source-env.sh по вкусу:
-  - ip адреса машин
-  - порты отдельны
+0. убеждаемся, что собран контейнер demo-mtm-postgres
+1. редактируем ./env.sh по вкусу:
+  - connstring для каждой ноды
+  - порты для каждой ноды
 2.
-3. docker compose up
+3. docker compose -f mtm-compose.yml up -d
 ...
-4. docker compose down
+4. docker compose -f mtm-compose.yml down
 
 ### Общий сценарий проверки
 
