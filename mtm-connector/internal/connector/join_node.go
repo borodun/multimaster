@@ -11,47 +11,49 @@ func (m *MtmConnector) JoinNode(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	host := vars["host"]
-	if host == "" {
-		log.Error("join node: empty host")
+	port := vars["port"]
+	addr := host + ":" + port
+	if host == "" || port == "" {
+		log.Error("add node: empty host or port")
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintln(w, "no host provided")
+		fmt.Fprintln(w, "empty host or port provided")
 		return
 	}
 
 	lsn := vars["lsn"]
 	if lsn == "" {
-		log.WithField("host", host).Error("join node: empty host")
+		log.WithField("addr", addr).Error("join node: empty lsn")
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, "no lsn provided")
 		return
 	}
 
-	id, ok := m.Hosts[host]
+	id, ok := m.Hosts[addr]
 	if !ok {
-		log.WithField("host", host).Errorf("join node: no id for '%s' host", host)
+		log.WithField("addr", addr).Errorf("join node: no id for '%s' host", addr)
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "no id for %s found, you should add node firstly\n", host)
+		fmt.Fprintf(w, "no id for %s found, you should add node firstly\n", addr)
 		return
 	}
-	_, ok = m.Joined[host]
+	_, ok = m.Joined[addr]
 	if !ok {
-		log.WithField("host", host).Errorf("join node: '%s' already joined", host)
+		log.WithField("addr", addr).Errorf("join node: '%s' already joined", addr)
 		w.WriteHeader(http.StatusAlreadyReported)
-		fmt.Fprintf(w, "%s already joined\n", host)
+		fmt.Fprintf(w, "%s already joined\n", addr)
 		return
 	}
 
 	err := m.mtmJoinNode(id, lsn)
 	if err != nil {
-		log.WithField("host", host).WithError(err).Error("join node")
+		log.WithField("addr", addr).WithError(err).Error("join node")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "error occurred: %s\n", err.Error())
 		return
 	}
 
-	log.WithField("host", host).Infof("joined node: id: %s", id)
+	log.WithField("addr", addr).Infof("joined node: id: %s", id)
 
-	m.Joined[host] = true
+	m.Joined[addr] = true
 
 	fmt.Fprintln(w, "joined node")
 }

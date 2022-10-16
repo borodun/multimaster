@@ -21,11 +21,11 @@ func (m *MtmConnector) Serve(port string) {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/v1/add-node", m.AddNode).
-		Queries("host", "{host}")
+		Queries("host", "{host}", "port", "{port}")
 	r.HandleFunc("/api/v1/join-node", m.JoinNode).
-		Queries("lsn", "{lsn}", "host", "{host}")
+		Queries("lsn", "{lsn}", "host", "{host}", "port", "{port}")
 	r.HandleFunc("/api/v1/drop-node", m.DropNode).
-		Queries("host", "{host}")
+		Queries("host", "{host}", "port", "{port}")
 
 	srv := &http.Server{
 		Addr:         ":" + port,

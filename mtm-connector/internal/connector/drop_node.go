@@ -11,43 +11,45 @@ func (m *MtmConnector) DropNode(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	host := vars["host"]
-	if host == "" {
-		log.Error("drop node: empty host")
+	port := vars["port"]
+	addr := host + ":" + port
+	if host == "" || port == "" {
+		log.Error("add node: empty host or port")
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintln(w, "no host provided")
+		fmt.Fprintln(w, "empty host or port provided")
 		return
 	}
 
-	id, ok := m.Hosts[host]
+	id, ok := m.Hosts[addr]
 	if !ok {
-		log.WithField("host", host).Errorf("drop node: no id for '%s' host", host)
+		log.WithField("addr", addr).Errorf("drop node: no id for '%s' host", addr)
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "no id for %s found, you should add node firstly\n", host)
+		fmt.Fprintf(w, "no id for %s found, you should add node firstly\n", addr)
 		return
 	}
 
 	joined := m.Joined[host]
 	if !joined {
-		log.WithField("host", host).Errorf("drop node: node '%s' not joined", host)
+		log.WithField("addr", addr).Errorf("drop node: node '%s' not joined", addr)
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "node %s not joined, you should join node firstly\n", host)
+		fmt.Fprintf(w, "node %s not joined, you should join node firstly\n", addr)
 		return
 	}
 
 	err := m.mtmDropNode(id)
 	if err != nil {
-		log.WithField("host", host).WithError(err).Error("drop node")
+		log.WithField("addr", addr).WithError(err).Error("drop node")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "error occurred %s\n", err.Error())
-		delete(m.Hosts, host)
-		delete(m.Joined, host)
+		delete(m.Hosts, addr)
+		delete(m.Joined, addr)
 		return
 	}
 
-	log.WithField("host", host).Infof("dropped node: id: %s", id)
+	log.WithField("host", addr).Infof("dropped node: id: %s", id)
 
-	delete(m.Hosts, host)
-	delete(m.Joined, host)
+	delete(m.Hosts, addr)
+	delete(m.Joined, addr)
 
 	fmt.Fprintln(w, "node dropped")
 }
