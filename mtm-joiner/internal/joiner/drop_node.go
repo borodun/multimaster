@@ -7,8 +7,10 @@ import (
 	"net/http"
 )
 
-func (j *Joiner) dropNode(ip string) {
-	dropNodeURL := fmt.Sprintf("%s/api/v1/drop-node?host=%s", j.URL, ip)
+func (j *Joiner) dropNode() {
+	dropNodeURL := fmt.Sprintf("%s/api/v1/drop-node?host=%s&port=%s", j.URL, j.Addr, j.Port)
+
+	log.Infof("drop url: %s", dropNodeURL)
 
 	resp, err := http.Get(dropNodeURL)
 	if err != nil {

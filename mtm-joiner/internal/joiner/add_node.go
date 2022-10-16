@@ -7,14 +7,12 @@ import (
 	"net/http"
 )
 
-func (j *Joiner) addNode(ip string) string {
-	addNodeURL := fmt.Sprintf("%s/api/v1/add-node?host=%s", j.URL, ip)
+func (j *Joiner) addNode() string {
+	addNodeURL := fmt.Sprintf("%s/api/v1/add-node?host=%s&port=%s", j.URL, j.Addr, j.Port)
 
-	return getConnStr(addNodeURL)
-}
+	log.Infof("add url: %s", addNodeURL)
 
-func getConnStr(url string) string {
-	resp, err := http.Get(url)
+	resp, err := http.Get(addNodeURL)
 	if err != nil {
 		log.WithError(err).Fatalf("getting connection string: http get")
 	}

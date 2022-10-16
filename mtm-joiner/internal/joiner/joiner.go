@@ -11,24 +11,27 @@ type Joiner struct {
 	URL    string
 	PGDATA string
 	Port   string
+	Addr   string
 }
 
 func (j *Joiner) Start(drop bool) {
-	localIP := getLocalIP()
+	if j.Addr == "" {
+		j.Addr = getLocalIP()
+	}
 
 	if drop {
 		log.Info("dropping node")
 		j.stopPg()
-		j.dropNode(localIP)
+		j.dropNode()
 		return
 	}
 
-	connStr := j.addNode(localIP)
+	connStr := j.addNode()
 
 	log.RegisterExitHandler(func() {
 		log.Info("something went wrong: dropping node")
 		j.stopPg()
-		j.dropNode(localIP)
+		j.dropNode()
 	})
 
 	j.stopPg()
@@ -37,7 +40,7 @@ func (j *Joiner) Start(drop bool) {
 	j.startPg()
 
 	log.Info("waiting for node to become ready")
-	for i := 0; i < 10; i++ {
+	for {
 		_, err := execCmd(fmt.Sprintf("psql -U mtmuser -d mydb -p %s -c 'SELECT 1'", j.Port))
 		if err == nil {
 			break
@@ -45,7 +48,7 @@ func (j *Joiner) Start(drop bool) {
 		time.Sleep(5 * time.Second)
 	}
 
-	j.joinNode(localIP, lsn)
+	j.joinNode(lsn)
 }
 
 func getLocalIP() string {
