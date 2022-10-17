@@ -1,10 +1,16 @@
 # Info
-Deploy multimaster cluster from scratch
+Deploy multimaster cluster from existing database backup
 
 Logs are in _mm/node*/logfile_
 
 ## Usage
-You need to change **LOCAL_IP** in _conf.env_
+You need to have some database backup to start from. You can make it using [_scenario 020_](../020_creating_mm_from_existing_db_dump/README.md).
+
+```bash
+cp -r ../020_creating_mm_from_existing_db_dump/backup/* ./databases/demo-small/
+```
+
+You need to change **LOCAL_IP** in _conf.env_. Also change **BACKUP_FOLDER** if you want to use your own database.
 
 Start scenario:
 ```bash
@@ -44,13 +50,13 @@ source conf.env
 
 1. Init 3 postgres instances:
 ```bash
-mkdir -p mm/node1
-mkdir -p mm/node2
-mkdir -p mm/node3
+mkdir -p mm/node1 -m 0750
+mkdir -p mm/node2 -m 0750
+mkdir -p mm/node3 -m 0750
 
-initdb -D mm/node1
-initdb -D mm/node2
-initdb -D mm/node3
+cp -r $BACKUP_FOLDER/* mm/node1/
+cp -r $BACKUP_FOLDER/* mm/node2/
+cp -r $BACKUP_FOLDER/* mm/node3/
 ```
 
 2. Configure instances:
@@ -71,18 +77,7 @@ pg_ctl -D mm/node2 -o "-p $MM_PORT2" -l mm/node2/logfile start
 pg_ctl -D mm/node3 -o "-p $MM_PORT3" -l mm/node3/logfile start
 ```
 
-4. Create database for mm:
-```bash
-psql -h localhost -p $MM_PORT1 -d postgres -a -c "$CREATE_USER"
-psql -h localhost -p $MM_PORT2 -d postgres -a -c "$CREATE_USER"
-psql -h localhost -p $MM_PORT3 -d postgres -a -c "$CREATE_USER"
-
-psql -h localhost -p $MM_PORT1 -d postgres -a -c "$CREATE_DB"
-psql -h localhost -p $MM_PORT2 -d postgres -a -c "$CREATE_DB"
-psql -h localhost -p $MM_PORT3 -d postgres -a -c "$CREATE_DB"
-```
-
-5. Init mm:
+4. Init mm:
 ```bash
 psql -h localhost -p $MM_PORT1 -d $MM_DB -a -c "$INIT_MM"
 ```

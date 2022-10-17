@@ -1,5 +1,5 @@
 # Info
-Deploy multimaster cluster from scratch
+Deploy multimaster cluster from scratch with referee
 
 Logs are in _mm/node*/logfile_
 
@@ -14,6 +14,12 @@ Start scenario:
 End scenrio:
 ```bash
 ./end_scenario.sh
+```
+
+Connecting to instance:
+```bash
+source conf.env
+psql -h localhost -p $MM_PORT1 -d $MM_DB -U $MM_USER
 ```
 
 Other utils:
@@ -47,18 +53,16 @@ initdb -D mm/node2
 initdb -D mm/node3
 ```
 
-2. Copy configs to instances:
+2. Configure instances:
 ```bash
-cp $PG_CONF mm/node1
-cp $PG_CONF mm/node2
-cp $PG_CONF mm/node3
+echo -e $PG_CONF_LINES >> mm/node1/postgresql.conf
+echo -e $PG_CONF_LINES >> mm/node2/postgresql.conf
 
-cp $PG_HBA mm/node1
-cp $PG_HBA mm/node2
-cp $PG_HBA mm/node3
+echo -e $PG_HBA_LINES >> mm/node1/pg_hba.conf
+echo -e $PG_HBA_LINES >> mm/node2/pg_hba.conf
 ```
 
-2. Start and make 3rd node a referee:
+3. Start and make 3rd node a referee:
 ```bash
 pg_ctl -D mm/node3 -o "-p $REF_PORT" -l mm/node3/logfile start
 sleep 1
@@ -67,19 +71,19 @@ psql -h localhost -p $REF_PORT -d postgres -a -c "$CREATE_DB"
 psql -h localhost -p $REF_PORT -d $MM_DB -a -c "$INIT_REF"
 ```
 
-3. Modify configs for data nodes:
+4. Modify configs for data nodes:
 ```bash
-echo "$REF_CONNCONF" >> mm/node1/postgresql.conf
-echo "$REF_CONNCONF" >> mm/node2/postgresql.conf
+echo $REF_CONNCONF >> mm/node1/postgresql.conf
+echo $REF_CONNCONF >> mm/node2/postgresql.conf
 ```
 
-4. Start all instances:
+5. Start all instances:
 ```bash
 pg_ctl -D mm/node1 -o "-p $MM_PORT1" -l mm/node1/logfile start
 pg_ctl -D mm/node2 -o "-p $MM_PORT2" -l mm/node2/logfile start
 ```
 
-5. Create database for mm:
+6. Create database for mm:
 ```bash
 psql -h localhost -p $MM_PORT1 -d postgres -a -c "$CREATE_USER"
 psql -h localhost -p $MM_PORT2 -d postgres -a -c "$CREATE_USER"
@@ -88,7 +92,7 @@ psql -h localhost -p $MM_PORT1 -d postgres -a -c "$CREATE_DB"
 psql -h localhost -p $MM_PORT2 -d postgres -a -c "$CREATE_DB"
 ```
 
-6. Init mm:
+7. Init mm:
 ```bash
 psql -h localhost -p $MM_PORT1 -d $MM_DB -a -c "$INIT_MM"
 ```

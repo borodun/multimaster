@@ -6,24 +6,21 @@ source ./conf.env
 rm -rf mm
 
 # Init instances
-mkdir -p mm
-cd mm
-mkdir -p node1
-mkdir -p node2
-mkdir -p node3
-cd ..
+mkdir -p mm/node1
+mkdir -p mm/node2
+mkdir -p mm/node3
 
 initdb -D ./mm/node1
 initdb -D ./mm/node2
 initdb -D ./mm/node3
 
-cp $PG_CONF ./mm/node1/
-cp $PG_CONF ./mm/node2/
-cp $PG_CONF ./mm/node3/
+echo -e $PG_CONF_LINES >> mm/node1/postgresql.conf
+echo -e $PG_CONF_LINES >> mm/node2/postgresql.conf
+echo -e $PG_CONF_LINES >> mm/node3/postgresql.conf
 
-cp $PG_HBA ./mm/node1/
-cp $PG_HBA ./mm/node2/
-cp $PG_HBA ./mm/node3/
+echo -e $PG_HBA_LINES >> mm/node1/pg_hba.conf
+echo -e $PG_HBA_LINES >> mm/node2/pg_hba.conf
+echo -e $PG_HBA_LINES >> mm/node3/pg_hba.conf
 
 # Make a referee
 pg_ctl -D mm/node3 -o "-p $REF_PORT" -l mm/node3/logfile start
@@ -45,7 +42,6 @@ do
     psql -U $(whoami) -p $port -h localhost -d postgres -a -c "$CREATE_USER"
     psql -U $(whoami) -p $port -h localhost -d postgres -a -c "$CREATE_DB"
 done
-
 
 # Init cluster
 psql -U $MM_USER -p $MM_PORT1 -h localhost -d $MM_DB -a -c "$INIT_MM"

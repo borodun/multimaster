@@ -17,6 +17,7 @@ initdb -D ./mm/node1
 initdb -D ./mm/node2
 initdb -D ./mm/node3
 
+# Canfigure instances
 echo -e $PG_CONF_LINES >> mm/node1/postgresql.conf
 echo -e $PG_CONF_LINES >> mm/node2/postgresql.conf
 echo -e $PG_CONF_LINES >> mm/node3/postgresql.conf
@@ -37,3 +38,7 @@ done
 
 # Init cluster
 psql -U $MM_USER -p $MM_PORT1 -h localhost -d $MM_DB -a -c "$INIT_MM"
+
+sleep 5
+# Apply dump file on 1st node
+psql -U $MM_USER -p $port -h localhost -d postgres -b -f $DUMP_FILE

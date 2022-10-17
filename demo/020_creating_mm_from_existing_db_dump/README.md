@@ -1,10 +1,16 @@
 # Info
-Deploy multimaster cluster from scratch
+Deploy multimaster cluster from existing database dump
 
 Logs are in _mm/node*/logfile_
 
 ## Usage
-You need to change **LOCAL_IP** in _conf.env_
+You need to have some database to start from, for example, [demo database](https://postgrespro.ru/education/demodb):
+```bash
+curl --create-dirs --output-dir databases/demo-small/ -O https://edu.postgrespro.ru/demo-small.zip
+unzip databases/demo-small/demo-small.zip -d databases/demo-small
+```
+
+You need to change **LOCAL_IP** in _conf.env_. Also change **DUMP_FILE** if you want to use your own database.
 
 Start scenario:
 ```bash
@@ -34,6 +40,14 @@ Other utils:
 # Clean up after dropping node
 ./clean_up.sh <node-id>
 ```
+
+### If you need to create backup for future scenarios
+
+```bash
+./backup_from_dump.sh
+```
+
+Backup will be store in _./backup_
 
 ## By hand
 
@@ -85,4 +99,9 @@ psql -h localhost -p $MM_PORT3 -d postgres -a -c "$CREATE_DB"
 5. Init mm:
 ```bash
 psql -h localhost -p $MM_PORT1 -d $MM_DB -a -c "$INIT_MM"
+```
+
+6. Apply dump file:
+```bash
+psql -U $MM_USER -p $MM_PORT1 -h localhost -d postgres -b -f $DUMP_FILE
 ```
