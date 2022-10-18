@@ -3,6 +3,8 @@ version: "2.11"
 services:
   mtm-1:
     image: ${IMAGE}
+    privileged: true
+    shm_size: 1gb
     entrypoint:
       - /bin/bash
       - ./scripts/entrypoint.sh
@@ -11,6 +13,7 @@ services:
         ipv4_address: $HOST1
   mtm-2:
     image: ${IMAGE}
+    shm_size: 1gb
     entrypoint:
       - /bin/bash
       - ./scripts/entrypoint.sh
@@ -19,6 +22,7 @@ services:
         ipv4_address: $HOST2
   mtm-3:
     image: ${IMAGE}
+    shm_size: 1gb
     entrypoint:
       - /bin/bash
       - ./scripts/entrypoint.sh

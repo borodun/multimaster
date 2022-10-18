@@ -52,7 +52,7 @@ ENV PGGROUP=$PGGROUP
 ENV PGGID=$PGGID
 
 RUN apt-get update && \
-    apt-get -y install libreadline-dev curl less vim netcat net-tools lsof gdb rr gdbserver
+    apt-get -y install libreadline-dev curl less vim netcat net-tools lsof gdb rr gdbserver iproute2 iputils-ping iptables
 
 RUN groupadd -g $PGUID $PGGROUP
 RUN useradd -m $PGUSER -u $PGUID -g $PGGID

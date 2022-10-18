@@ -7,7 +7,7 @@
   - connstring для каждой ноды
   - порты для каждой ноды
 2. docker compose -f mtm-compose.yml up -d
-3. ./init_mmts.sh
+3. ./restore.sh && ./init_mmts.sh
 ...
 4. docker compose -f mtm-compose.yml down
 
@@ -37,6 +37,8 @@
 ч. `docker network connect mtmnet 060_failure-mtm-1-1`
 
 ### 3. Частичный обрыв связи (A-B-C топология)
+
+` $ iptables -A OUTPUT -s 10.11.0.12 -j REJECT `
 
 *здесь было убита куча времени на docker networks, прежде чем до меня дошло что ip один а не 2*
 можно попробовать что-то с фаерволом, но highly unlikely

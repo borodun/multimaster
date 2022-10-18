@@ -30,6 +30,7 @@ else
 
   if [ -z "$IS_DB_ALREADY_INITIALIZED" ]; then
     "$PGROOT"/bin/createuser mtmuser -s
+    "$PGROOT"/bin/createuser postgres -s
     "$PGROOT"/bin/createdb mydb -O mtmuser
   fi
 
