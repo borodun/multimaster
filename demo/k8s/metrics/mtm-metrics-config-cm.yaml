@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mtm-metrics-config
+data:
+  config.yaml: |-
+    metrics:
+      databases:
+        - name: node0
+          url: postgresql://user:1234@node0:5432/mydb?sslmode=disable
+      listenPort: 8080
+      interval: 30
+      queryTimeout: 15
+      connectionPoolMaxSize: 5
