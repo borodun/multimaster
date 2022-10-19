@@ -49,14 +49,6 @@ Grafana credentials: admin:prom-operator.
 
 ## Start collecting metrics
  
-You need to change **connection URL** for node in [config](metrics/config.yaml)
-
-Create namespace and config that will be mounted to container:
-```bash
-kubectl create namespace mtm
-kubectl create configmap mtm-metrics-config -n mtm --from-file=config.yaml=metrics/config.yaml
-```
-
 Add monitoring role in your db:
 ```bash
 CREATE USER monitoring WITH LOGIN PASSWORD '1234';
@@ -67,6 +59,14 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA mtm TO monitoring;
 GRANT pg_read_all_settings TO monitoring;
 GRANT pg_read_all_stats TO monitoring;
 GRANT SELECT ON mtm.cluster_nodes TO monitoring;
+```
+
+You need to change **connection URL** for node in [config](metrics/config.yaml)
+
+Create namespace and config that will be mounted to container:
+```bash
+kubectl create namespace mtm
+kubectl create configmap mtm-metrics-config -n mtm --from-file=config.yaml=metrics/config.yaml
 ```
 
 Deploy mtm-metrics:
