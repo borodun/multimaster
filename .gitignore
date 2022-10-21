@@ -1,3 +1,6 @@
 /metrics/test/*
 /mtmctl/test/*
 /local-deplot/mm*/*
+/demo/*/mm
+/demo/*/databases
+/demo/*/backup

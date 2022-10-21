@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mtm-metrics-deployment
+  labels:
+    app: mtm-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mtm-metrics
+  template:
+    metadata:
+      labels:
+        app: mtm-metrics
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: mtm-metrics
+          image: borodun/mtm-metrics
+          ports:
+            - name: metrics
+              containerPort: 8080
+          volumeMounts:
+            - name: config
+              mountPath: /home/mmts/config.yaml
+              subPath: config.yaml
+      volumes:
+        - name: config
+          configMap:
+            name: mtm-metrics-config
+            optional: false
