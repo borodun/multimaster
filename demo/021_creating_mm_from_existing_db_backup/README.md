@@ -10,7 +10,12 @@ You need to have some database backup to start from. You can make it using [_sce
 cp -r ../020_creating_mm_from_existing_db_dump/backup/* ./databases/demo-small/
 ```
 
-You need to change **LOCAL_IP** in _conf.env_. Also change **BACKUP_FOLDER** if you want to use your own database.
+You need to have **LOCAL_IP** environment variable that will store IP accessible to future nodes:
+```bash
+export LOCAL_IP=192.168.31.144
+```
+
+Also change **BACKUP_FOLDER** in _conf.env_ if you want to use your own database.
 
 Start scenario:
 ```bash

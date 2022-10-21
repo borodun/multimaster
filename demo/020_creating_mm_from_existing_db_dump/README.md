@@ -10,7 +10,12 @@ curl --create-dirs --output-dir databases/demo-small/ -O https://edu.postgrespro
 unzip databases/demo-small/demo-small.zip -d databases/demo-small
 ```
 
-You need to change **LOCAL_IP** in _conf.env_. Also change **DUMP_FILE** if you want to use your own database.
+You need to have **LOCAL_IP** environment variable that will store IP accessible to future nodes:
+```bash
+export LOCAL_IP=192.168.31.144
+```
+
+Also change **DUMP_FILE** in _conf.env_ if you want to use your own database.
 
 Start scenario:
 ```bash

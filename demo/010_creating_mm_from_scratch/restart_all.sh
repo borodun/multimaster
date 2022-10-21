@@ -1,3 +1,8 @@
+if [[ -z "${LOCAL_IP}" ]]; then
+  echo "LOCAL_IP is not set, read Usage in README"
+  exit
+fi
+
 # Get env vars
 source ./conf.env
 

@@ -4,7 +4,10 @@ Deploy multimaster cluster from scratch
 Logs are in _mm/node*/logfile_
 
 ## Usage
-You need to change **LOCAL_IP** in _conf.env_
+You need to have **LOCAL_IP** environment variable that will store IP accessible to future nodes:
+```bash
+export LOCAL_IP=192.168.31.144
+```
 
 Start scenario:
 ```bash
