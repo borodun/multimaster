@@ -21,7 +21,7 @@ func (j *Joiner) pgCtl(cmd string) {
 	if err != nil {
 		log.WithError(err).
 			WithField("cmd", cmd).
-			Fatal("pg_ctl error")
+			Error("pg_ctl error")
 	}
 }
 
@@ -29,6 +29,7 @@ func (j *Joiner) startPg() {
 	if j.pgIsReady() {
 		return
 	}
+	log.Info("starting postgres")
 	j.pgCtl("start")
 }
 
@@ -36,5 +37,6 @@ func (j *Joiner) stopPg() {
 	if !j.pgIsReady() {
 		return
 	}
+	log.Info("stopping postgres")
 	j.pgCtl("stop")
 }

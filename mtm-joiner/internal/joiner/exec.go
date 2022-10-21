@@ -20,7 +20,7 @@ func execCmd(args ...string) (string, error) {
 		log.WithField("stdout", o.String()).
 			WithField("stderr", e.String()).
 			WithField("cmd", cmd.Args).
-			WithError(err).Warn("exec error")
+			WithError(err).Debug("exec error")
 
 		return "", err
 	}

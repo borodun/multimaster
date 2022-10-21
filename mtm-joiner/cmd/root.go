@@ -14,6 +14,7 @@ var (
 	localAddr string
 	port      string
 	verbose   bool
+	pgdata    string
 )
 
 var rootCmd = &cobra.Command{
@@ -27,12 +28,12 @@ var rootCmd = &cobra.Command{
 		if verbose {
 			log.SetLevel(log.DebugLevel)
 		} else {
-			log.SetLevel(log.FatalLevel)
+			log.SetLevel(log.InfoLevel)
 		}
 
 		j := &joiner.Joiner{
 			URL:    url,
-			PGDATA: "./db",
+			PGDATA: pgdata,
 			Port:   port,
 			Addr:   localAddr,
 		}
@@ -49,8 +50,9 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().StringVarP(&url, "api-url", "u", "", "URL of API server (example: http://127.0.0.1:8080)")
-	rootCmd.Flags().StringVarP(&localAddr, "local-addr", "a", "", "Local address of the device (will try to detect automatically)")
+	rootCmd.Flags().StringVarP(&localAddr, "local-addr", "a", "", "Local address of the device (if empty, will try to detect automatically)")
 	rootCmd.Flags().StringVarP(&port, "port", "p", "15432", "Port for the database (default: 15432)")
+	rootCmd.Flags().StringVarP(&pgdata, "data", "D", "./db", "Folder for database (default: ./db)")
 	rootCmd.Flags().BoolVarP(&drop, "drop", "d", false, "If node needs to be dropped from cluster (default: false)")
 	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Add logs to output (default: false)")
 }

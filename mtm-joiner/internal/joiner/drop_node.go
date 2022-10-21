@@ -10,7 +10,7 @@ import (
 func (j *Joiner) dropNode() {
 	dropNodeURL := fmt.Sprintf("%s/api/v1/drop-node?host=%s&port=%s", j.URL, j.Addr, j.Port)
 
-	log.Infof("drop url: %s", dropNodeURL)
+	log.Debugf("drop url: %s", dropNodeURL)
 
 	resp, err := http.Get(dropNodeURL)
 	if err != nil {
@@ -27,5 +27,5 @@ func (j *Joiner) dropNode() {
 		log.WithField("response", string(body)).Error("dropping node: status code not 200")
 	}
 
-	log.Infof("response: %s", string(body))
+	log.Info(string(body))
 }

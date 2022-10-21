@@ -10,9 +10,10 @@ import (
 func (j *Joiner) joinNode(lsn string) {
 	joinNodeURL := fmt.Sprintf("%s/api/v1/join-node?host=%s&port=%s&lsn=%s", j.URL, j.Addr, j.Port, lsn)
 
-	log.Infof("join url: %s", joinNodeURL)
+	log.Debugf("join url: %s", joinNodeURL)
 
 	resp, err := http.Get(joinNodeURL)
+	println()
 	if err != nil {
 		log.WithError(err).Fatalf("joining node: http get")
 	}
@@ -27,5 +28,5 @@ func (j *Joiner) joinNode(lsn string) {
 		log.WithField("response", string(body)).Fatal("joining node: status code not 200")
 	}
 
-	log.Infof("response: %s", string(body))
+	log.Info(string(body))
 }
