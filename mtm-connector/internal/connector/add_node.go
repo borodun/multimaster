@@ -20,6 +20,14 @@ func (m *MtmConnector) AddNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, ok := m.Hosts[addr]
+	if ok {
+		log.WithField("addr", addr).Error("add node: node already added")
+		w.WriteHeader(http.StatusAlreadyReported)
+		fmt.Fprintf(w, "%s already added\n", addr)
+		return
+	}
+
 	id, err := m.mtmAddNodeAndGetID(host, port)
 	if err != nil {
 		log.WithField("addr", addr).WithError(err).Error("add node")

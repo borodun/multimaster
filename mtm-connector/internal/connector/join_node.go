@@ -35,8 +35,9 @@ func (m *MtmConnector) JoinNode(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "no id for %s found, you should add node firstly\n", addr)
 		return
 	}
-	_, ok = m.Joined[addr]
-	if !ok {
+
+	joined := m.Joined[addr]
+	if joined {
 		log.WithField("addr", addr).Errorf("join node: '%s' already joined", addr)
 		w.WriteHeader(http.StatusAlreadyReported)
 		fmt.Fprintf(w, "%s already joined\n", addr)

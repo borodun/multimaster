@@ -15,7 +15,7 @@ type Database struct {
 }
 
 func NewDatabase(connInfo string) Database {
-	log.Infof(connInfo)
+	//log.Infof(connInfo)
 	db, err := sql.Open("postgres", connInfo)
 	if err != nil {
 		log.WithError(err).Warn("failed to open url")
