@@ -10,6 +10,8 @@ export HOST3="10.11.0.13"
 
 export SUBNET1="10.11.0.0/24"
 
+export NODE1="060_failure-mtm-1-1"
+export NODE2="060_failure-mtm-2-1"
 
 # for sausage
 export SUBNET2="10.12.0.0/24"
