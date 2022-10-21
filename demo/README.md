@@ -2,7 +2,7 @@
 
 This is a collection of different use cases for Postgres Multimaster. 
 You can run all scenarios either by hand or by scripts. 
-For more information read go to particular scenario.
+For more information go to particular scenario.
 
 ### Requirements
 
