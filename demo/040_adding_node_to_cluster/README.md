@@ -12,7 +12,7 @@ Adding node to multimaster cluster
 ```bash
 cd <scenario>
 source conf.env
-./mtm-connector -u "postgresql://$MM_USER:$MM_PASSWORD@$LOCAL_IP:$MM_PORT1/$MM_DB?sslmode=disable"
+./mtm-connector -u "postgresql://${MM_USER}:${MM_PASSWORD}@${LOCAL_IP}:${MM_PORT1}/${MM_DB}?sslmode=disable"
 ```
 
 It will output on what address it is listening on. You'll need it for _mtm-joiner_.
@@ -26,24 +26,24 @@ It will output on what address it is listening on. You'll need it for _mtm-joine
 3. Get your ip addr in local network:
 ```bash
 ifconfig
-export LOCAL_IP=<ip>
+export LOCAL_IP="192.168.31.166"
 ```
 
-4. Export address and port of _mtm-connector_
+4. Export URL of _mtm-connector_
 ```bash
-export CONNECTOR_ADDR="http://192.168.31.144:8080"
+export CONNECTOR_URL="http://192.168.31.144:8080"
 ```
 Note: protocol is mandatory
 
 5. Add node with _mtm-joiner_:
 ```bash
-./mtm-joiner -u $CONNECTOR_ADDR -a $LOCAL_IP
+./mtm-joiner -u $CONNECTOR_URL -a $LOCAL_IP
 ```
 For additional arguments use **--help** flag
 
 6. To remove node from cluster add **--drop** flag:
 ```bash
-./mtm-joiner -u $CONNECTOR_ADDR -a $LOCAL_IP --drop
+./mtm-joiner -u $CONNECTOR_URL -a $LOCAL_IP --drop
 ```
 
 # By hand

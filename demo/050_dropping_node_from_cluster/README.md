@@ -13,18 +13,18 @@ To add node, see **scenario 040**.
 1. Get your ip addr in local network:
 ```bash
 ifconfig
-export LOCAL_IP=<ip>
+export LOCAL_IP="192.168.31.166"
 ```
 
-2. Export address and port of _mtm-connector_
+2. Export URL of _mtm-connector_
 ```bash
-export CONNECTOR_ADDR="http://192.168.31.144:8080"
+export CONNECTOR_URL="http://192.168.31.144:8080"
 ```
 Note: protocol is mandatory
 
 3. To remove node from cluster run _mtm-joiner_ with **--drop** flag:
 ```bash
-./mtm-joiner -u $CONNECTOR_ADDR -a $LOCAL_IP --drop
+./mtm-joiner -u $CONNECTOR_URL -a $LOCAL_IP --drop
 ```
 
 ### Clean up
