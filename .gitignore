@@ -4,3 +4,5 @@
 /demo/*/mm
 /demo/*/databases
 /demo/*/backup
+*.deb
+mtm-joiner
