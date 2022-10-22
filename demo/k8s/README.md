@@ -61,12 +61,12 @@ GRANT pg_read_all_stats TO monitoring;
 GRANT SELECT ON mtm.cluster_nodes TO monitoring;
 ```
 
-You need to change **connection URL** for node in [config](metrics/config.yaml)
+You need to change **connection URL** for node in [config map](metrics/mtm-metrics-config-cm.yaml)
 
 Create namespace and config that will be mounted to container:
 ```bash
 kubectl create namespace mtm
-kubectl create configmap mtm-metrics-config -n mtm --from-file=config.yaml=metrics/config.yaml
+kubectl apply -f metrics/mtm-metrics-config-cm.yaml -n mtm
 ```
 
 Deploy mtm-metrics:
@@ -74,9 +74,15 @@ Deploy mtm-metrics:
 kubectl apply -f metrics/mtm-metrics-deployment.yaml -n mtm
 ```
 
-Deploy PodMonitor for mtm-metrics if you installed Prometheus operator:
+Deploy PodMonitor for mtm-metrics if you installed Prometheus stack from above:
 ```bash
 kubectl apply -f metrics/mtm-metrics-pod-monitor.yaml -n mtm
+```
+
+**If you edited _config_ and want new changes to take effect:**
+```bash
+kubectl apply -f metrics/mtm-metrics-config-cm.yaml -n mtm
+kubectl rollout restart deployment mtm-metrics-deployment -n mtm
 ```
 
 ## Grafana dashboard
