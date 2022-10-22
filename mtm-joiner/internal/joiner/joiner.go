@@ -54,9 +54,11 @@ func (j *Joiner) Start(drop bool) {
 	j.startPg()
 
 	log.Info("waiting for node to become ready for joining")
+	dbname := getFieldFromConnInfo(connStr, "dbname")
+	user := getFieldFromConnInfo(connStr, "user")
 	for {
 		fmt.Printf(".")
-		_, err := execCmd(fmt.Sprintf("psql -U mtmuser -d mydb -p %s -c 'SELECT 1'", j.Port))
+		_, err := execCmd(fmt.Sprintf("psql -U %s -d %s -p %s -c 'SELECT 1'", user, dbname, j.Port))
 		if err == nil {
 			break
 		}
@@ -89,11 +91,13 @@ func (j *Joiner) askToStopPg() error {
 
 		if ans == "y" || ans == "yes" {
 			j.stopPg()
+		} else {
+			return fmt.Errorf("user chose not to stop Postgres")
 		}
 
 		return nil
 	}
-	return fmt.Errorf("user chose not to stop Postgres")
+	return nil
 }
 
 func (j *Joiner) removePGDATA() error {
@@ -133,4 +137,15 @@ func getLocalIP() string {
 	defer conn.Close()
 	ipAddress := conn.LocalAddr().(*net.UDPAddr)
 	return ipAddress.IP.String()
+}
+
+func getFieldFromConnInfo(connInfo, field string) string {
+	connInfoFields := strings.Split(connInfo, " ")
+	for _, f := range connInfoFields {
+		keyValue := strings.Split(f, "=")
+		if keyValue[0] == field {
+			return keyValue[1]
+		}
+	}
+	return ""
 }

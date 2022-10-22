@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"strings"
 )
 
 func (j *Joiner) addNode() string {
@@ -28,6 +29,7 @@ func (j *Joiner) addNode() string {
 	}
 
 	log.Info("node added")
+	log.Debug(strings.Trim(string(body), "\n"))
 
-	return string(body)
+	return strings.Trim(string(body), "\n")
 }
