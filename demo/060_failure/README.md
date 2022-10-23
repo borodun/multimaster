@@ -6,10 +6,10 @@
 1. редактируем ./env.sh по вкусу:
   - connstring для каждой ноды
   - порты для каждой ноды
-2. docker compose -f mtm-compose.yml up -d
-3. ./restore.sh && ./init_mmts.sh
+2. docker compose up -d
+3. ./scripts/restore.sh && ./scripts/init_mmts.sh
 ...
-4. docker compose -f mtm-compose.yml down
+4. docker compose down
 
 ### Общий сценарий проверки
 
@@ -18,27 +18,55 @@
 Пару слов о характере нагрузки
 2. `./load.sh <port>`
 3. *ломаем (см. ниже)*
-4. Показываем, что работа не нарушилась - подключимся  
-`psql <port-reserve>`  
-сделаем несколько запросов на запись и на чтение
-`select`
-`insert`
-`select`
-5. `./load.sh <port-reserve>`
-6. *чиним (см. ниже)* 
-7. `./load.sh <port>`
+4. Показываем, что работа не нарушилась - подключимся  `$ psql -U mtmuser -p $PORT1 -h $HOST1 -d $DBNAME -a -c "select * from mtm.status();"`
+сделаем несколько запросов на запись с включенным `watch`. 
+5. `./load.sh <port-reserve>`  
+6. *чиним (см. ниже)*   
+7. `./load.sh <port>`  
 
 ### 1. Выключение ноды
-л. `docker stop 060_failure-mtm-1-1`
-ч. `docker start 060_failure-mtm-1-1`
+
+Подготовка  
+
+    $ export NODE=060_failure-mtm-1-1
+
+Ломаем 
+
+    $ docker stop $NODE
+
+Чиним  
+    
+    $ docker start $NODE
 
 ### 2. Полный обрыв связи
-л. `docker network disconnect mtmnet 060_failure-mtm-1-1`
-ч. `docker network connect mtmnet 060_failure-mtm-1-1`
+
+Подготовка    
+    
+    $ export NODE1=060_failure-mtm-1-1
+
+Ломаем   
+    
+    $ docker exec -u 0 -it $NODE1 iptables -A OUTPUT -d $HOST2 -j REJECT
+    $ docker exec -u 0 -it $NODE1 iptables -A OUTPUT -d $HOST3 -j REJECT
+
+Чиним  
+    
+    $ docker exec -u 0 -it $NODE1 iptables -D OUTPUT -d $HOST2 -j REJECT
+    $ docker exec -u 0 -it $NODE1 iptables -D OUTPUT -d $HOST3 -j REJECT
 
 ### 3. Частичный обрыв связи (A-B-C топология)
 
-` $ iptables -A OUTPUT -s 10.11.0.12 -j REJECT `
+Подготовка    
 
-*здесь было убита куча времени на docker networks, прежде чем до меня дошло что ip один а не 2*
-можно попробовать что-то с фаерволом, но highly unlikely
+    $ export NODE1=060_failure-mtm-1-1
+    $ export NODE2=060_failure-mtm-2-1
+
+Ломаем   
+
+    $ docker exec -u 0 -it $NODE1 iptables -A OUTPUT -d $HOST2 -j REJECT
+    $ docker exec -u 0 -it $NODE2 iptables -A OUTPUT -d $HOST1 -j REJECT
+Чиним  
+
+    $ docker exec -u 0 -it $NODE1 iptables -D OUTPUT -d $HOST2 -j REJECT
+    $ docker exec -u 0 -it $NODE2 iptables -D OUTPUT -d $HOST1 -j REJECT
+

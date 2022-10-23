@@ -1,0 +1,35 @@
+version: "2.11"
+
+services:
+  mtm-1:
+    image: weibeld/ubuntu-networking
+    entrypoint: sleep 100000
+    ports: 
+      - "${PORT1}:5432"
+    networks:
+      - net-2
+      - net-3
+  mtm-2:
+    image: weibeld/ubuntu-networking
+    entrypoint: sleep 100000
+    ports: 
+      - "${PORT2}:5432"
+    networks:
+      - net-1
+      - net-3
+  mtm-3:
+    image: weibeld/ubuntu-networking
+    entrypoint: sleep 100000
+    ports: 
+      - "${PORT3}:5432"
+    networks:
+      - net-1
+      - net-2
+networks:
+  net-1:
+    driver: bridge
+  net-2:
+    driver: bridge
+  net-3:
+    driver: bridge
+

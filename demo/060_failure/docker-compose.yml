@@ -2,34 +2,38 @@ version: "2.11"
 
 services:
   mtm-1:
-    image: weibeld/ubuntu-networking
-    entrypoint: sleep 100000
-    ports: 
-      - "${PORT1}:5432"
+    image: ${IMAGE}
+    privileged: true
+    shm_size: 1gb
+    entrypoint:
+      - /bin/bash
+      - ./scripts/entrypoint.sh
     networks:
-      - net-2
-      - net-3
+      mtmnet:
+        ipv4_address: $HOST1
   mtm-2:
-    image: weibeld/ubuntu-networking
-    entrypoint: sleep 100000
-    ports: 
-      - "${PORT2}:5432"
+    image: ${IMAGE}
+    privileged: true
+    shm_size: 1gb
+    entrypoint:
+      - /bin/bash
+      - ./scripts/entrypoint.sh
     networks:
-      - net-1
-      - net-3
+      mtmnet:
+        ipv4_address: $HOST2
   mtm-3:
-    image: weibeld/ubuntu-networking
-    entrypoint: sleep 100000
-    ports: 
-      - "${PORT3}:5432"
+    image: ${IMAGE}
+    privileged: true
+    shm_size: 1gb
+    entrypoint:
+      - /bin/bash
+      - ./scripts/entrypoint.sh
     networks:
-      - net-1
-      - net-2
+      mtmnet:
+        ipv4_address: $HOST3
 networks:
-  net-1:
+  mtmnet:
     driver: bridge
-  net-2:
-    driver: bridge
-  net-3:
-    driver: bridge
-
+    ipam:
+      config:
+        - subnet: $SUBNET1
