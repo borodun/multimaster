@@ -7,6 +7,7 @@ Logs are in _mm/node*/logfile_
 You need to have some database backup to start from. You can make it using [_scenario 020_](../020_creating_mm_from_existing_db_dump/README.md).
 
 ```bash
+mkdir -p databases/demo-small
 cp -r ../020_creating_mm_from_existing_db_dump/backup/* ./databases/demo-small/
 ```
 

@@ -1,1 +1,1 @@
-psql -U mtmuser -d mydb -p 15432
+psql -U mtmuser -d demo -p 15432

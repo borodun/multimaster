@@ -15,6 +15,11 @@ source conf.env
 ./mtm-connector -u "postgresql://${MM_USER}:${MM_PASSWORD}@${LOCAL_IP}:${MM_PORT1}/${MM_DB}?sslmode=disable"
 ```
 
+Or run throught:
+```bash
+docker run -p 8080:8080 borodun/mtm-connector -u "postgresql://${MM_USER}:${MM_PASSWORD}@${LOCAL_IP}:${MM_PORT1}/${MM_DB}?sslmode=disable"
+```
+
 It will output on what address it is listening on. You'll need it for _mtm-joiner_.
 
 ## On Phone
@@ -51,12 +56,12 @@ For additional arguments use **--help** flag
 [Mtm docs](https://postgrespro.github.io/mmts/#multimaster-adding-new-nodes-to-the-cluster)
 
 1. Figure out the required connection string to access the new node.
- For example, for the database mydb, user mtmuser, and the new node node4,
- the connection string can be "dbname=mydb user=mtmuser host=node4". 
+ For example, for the database demo, user mtmuser, and the new node node4,
+ the connection string can be "dbname=demo user=mtmuser host=node4". 
 
 2. On one online node:
 ```sql
-SELECT mtm.add_node('dbname=mydb user=mtmuser host=node4');
+SELECT mtm.add_node('dbname=demo user=mtmuser host=node4');
 ```
 It will return _id_ for new node
 

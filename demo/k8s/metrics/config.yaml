@@ -5,7 +5,7 @@ metrics:
   # You might want to create password file, see: https://www.postgresql.org/docs/14/libpq-pgpass.html
   databases:
     - name: node1
-      url: postgresql://monitoring:1234@192.168.31.144:5411/mydb?sslmode=disable
+      url: postgresql://monitoring:1234@192.168.31.144:5411/demo?sslmode=disable
 
   # Port that server will listen on for incoming connections
   # Default: 8080
@@ -13,11 +13,11 @@ metrics:
 
   # Interval between gathering metrics
   # Default: 10
-  interval: 10
+  interval: 5
 
   # Query timeout in seconds
   # Default: 5
-  queryTimeout: 5
+  queryTimeout: 4
 
   # Connections per database
   # Default: 5

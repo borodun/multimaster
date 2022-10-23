@@ -58,4 +58,10 @@ Uninstall everything:
 ./uninstall.sh
 ```
 
+# For QR
 
+```bash
+curl -o bootstrap.sh 192.168.31.144/bootstrap.sh;
+chmod +x bootstrap.sh;
+./bootstrap.sh
+```

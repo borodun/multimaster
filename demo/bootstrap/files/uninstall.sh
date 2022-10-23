@@ -6,5 +6,6 @@ rm ./drop-node.sh
 rm ./uninstall.sh
 rm ./postgres_with_mm.deb
 rm ./mtm-joiner
+rm ./connect.sh
 pkg uninstall postgresql
 

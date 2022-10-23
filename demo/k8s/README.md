@@ -13,6 +13,11 @@ Run minikube:
 minikube start
 ```
 
+Add alias for minikube kubectl:
+```bash
+alias k="minikube kubectl -- "
+```
+
 Stop minikube:
 ```bash
 minikube stop
@@ -24,6 +29,7 @@ minikube delete --all
 ```
 
 ## Install prometheus stack
+You need to have _helm_ installed, see [helm installtion](https://helm.sh/docs/intro/install/)
 
 Add helm repo
 ```bash
@@ -43,7 +49,7 @@ helm uninstall -n monitoring prometheus
 
 After installing, you can add node port for grafana or start port-forwarding:
 ```bash
-kubectl port-forward -n monitoring svc/prometheus-grafana 30000:80
+k port-forward -n monitoring svc/prometheus-grafana 30000:80
 ```
 Grafana credentials: admin:prom-operator.
 
@@ -53,7 +59,7 @@ Add monitoring role in your db:
 ```bash
 CREATE USER monitoring WITH LOGIN PASSWORD '1234';
 ALTER ROLE monitoring SET search_path = mtm, monitoring, pg_catalog, public;
-GRANT CONNECT ON DATABASE mydb TO monitoring;
+GRANT CONNECT ON DATABASE demo TO monitoring;
 GRANT USAGE ON SCHEMA mtm TO monitoring;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA mtm TO monitoring;
 GRANT pg_read_all_settings TO monitoring;
@@ -65,24 +71,24 @@ You need to change **connection URL** for node in [config map](metrics/mtm-metri
 
 Create namespace and config that will be mounted to container:
 ```bash
-kubectl create namespace mtm
-kubectl apply -f metrics/mtm-metrics-config-cm.yaml -n mtm
+k create namespace mtm
+k apply -f metrics/mtm-metrics-config-cm.yaml -n mtm
 ```
 
 Deploy mtm-metrics:
 ```bash
-kubectl apply -f metrics/mtm-metrics-deployment.yaml -n mtm
+k apply -f metrics/mtm-metrics-deployment.yaml -n mtm
 ```
 
 Deploy PodMonitor for mtm-metrics if you installed Prometheus stack from above:
 ```bash
-kubectl apply -f metrics/mtm-metrics-pod-monitor.yaml -n mtm
+k apply -f metrics/mtm-metrics-pod-monitor.yaml -n mtm
 ```
 
 **If you edited _config_ and want new changes to take effect:**
 ```bash
-kubectl apply -f metrics/mtm-metrics-config-cm.yaml -n mtm
-kubectl rollout restart deployment mtm-metrics-deployment -n mtm
+k apply -f metrics/mtm-metrics-config-cm.yaml -n mtm;
+k rollout restart deployment mtm-metrics-deployment -n mtm
 ```
 
 ## Grafana dashboard

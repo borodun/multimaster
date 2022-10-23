@@ -6,9 +6,9 @@ data:
   config.yaml: |-
     metrics:
       databases:
-        - name: node0
-          url: postgresql://user:1234@node0:5432/mydb?sslmode=disable
+        - name: node1
+          url: postgresql://user:1234@node0:5432/demo?sslmode=disable
       listenPort: 8080
-      interval: 30
-      queryTimeout: 15
+      interval: 5
+      queryTimeout: 4
       connectionPoolMaxSize: 5

@@ -11,12 +11,9 @@ source ./conf.env
 rm -rf mm
 
 # Init instances
-mkdir -p mm
-cd mm
-mkdir -p node1
-mkdir -p node2
-mkdir -p node3
-cd ..
+mkdir -p mm/node1
+mkdir -p mm/node2
+mkdir -p mm/node3
 
 initdb -D ./mm/node1
 initdb -D ./mm/node2
