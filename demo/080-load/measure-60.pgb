@@ -1,0 +1,17 @@
+\set id random(1, 10000000)
+\set new_value random(1, 100)
+
+\if random(0, 99) < 60
+	-- insert
+	BEGIN;
+		update test SET
+			value = :new_value
+			where id = :id;
+	COMMIT;
+\else
+	-- read
+	BEGIN;
+		select value from test where id = :id;
+	COMMIT;
+\endif
+
