@@ -24,8 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 31,
-  "iteration": 1662202057941,
+  "id": 27,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -39,7 +38,7 @@
       },
       "id": 6,
       "panels": [],
-      "title": "Info",
+      "title": "Cluster overview",
       "type": "row"
     },
     {
@@ -47,6 +46,7 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Shows most recent info about nodes.\n\nLatency is RTT between Postgres instance and metrics exporter",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -208,12 +208,72 @@
                 ]
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Generation"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 102
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Latency"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Connection name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 166
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Backends"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 92
+              }
+            ]
           }
         ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 10,
+        "h": 5,
+        "w": 7,
         "x": 0,
         "y": 1
       },
@@ -230,7 +290,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "8.5.2",
+      "pluginVersion": "9.0.5",
       "targets": [
         {
           "datasource": {
@@ -332,6 +392,72 @@
       "type": "table"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Number of monitored nodes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 7,
+        "y": 1
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 20
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "count (group by (connection_name) (postgresql_up{connection_name=~\"$conn\"}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Nodes count",
+      "type": "stat"
+    },
+    {
       "cards": {
         "cardHSpacing": 1,
         "cardMinWidth": 5,
@@ -387,10 +513,11 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Status map of every node in multimaster cluster.\n\nIf bucket contains several statuses then the one with the higher priority will be showed. Priority is showed at the bottom, left to right",
       "gridPos": {
-        "h": 8,
-        "w": 14,
-        "x": 10,
+        "h": 5,
+        "w": 15,
+        "x": 9,
         "y": 1
       },
       "hideBranding": false,
@@ -511,18 +638,19 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 6
       },
       "id": 37,
       "panels": [],
-      "title": "Replication",
+      "title": "Replication lag",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P0D6E4079E36703EB"
+        "uid": "prometheus"
       },
+      "description": "Replication lag shows how nodes lag between each other.\n\nFor example, `node1 mtm_slot_2` shows how much data has accumulated in the `node1`'s slot for `node2`",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -578,7 +706,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 7
       },
       "id": 38,
       "options": {
@@ -599,7 +727,9 @@
             "uid": "P0D6E4079E36703EB"
           },
           "editorMode": "code",
-          "expr": "sum by (connection_name,slot_name) (rate(postgresql_replication_lag_bytes{connection_name=~\"$conn\"}[$__rate_interval]))",
+          "exemplar": false,
+          "expr": "sum by (connection_name, slot_name) (rate(postgresql_replication_lag_bytes{connection_name=~\"$conn\"}[$__rate_interval]))",
+          "instant": false,
           "legendFormat": "{{connection_name}} {{slot_name}}",
           "range": true,
           "refId": "A"
@@ -614,11 +744,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 13
       },
       "id": 8,
       "panels": [],
-      "title": "DB Usage",
+      "title": "Tuples details",
       "type": "row"
     },
     {
@@ -626,6 +756,7 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Number of live rows fetched by index scans in this database. See `pg_stat_database`\n\nTable `t` with 1000 rows: \\\n`SELECT count(*) FROM t;`\n\nFetched: 1 \\\nReturned: 1000",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -672,7 +803,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -680,12 +812,14 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 17
+        "y": 14
       },
       "id": 4,
       "options": {
         "legend": {
           "calcs": [
+            "min",
+            "max",
             "mean"
           ],
           "displayMode": "table",
@@ -705,9 +839,23 @@
           "editorMode": "code",
           "expr": "sum by (connection_name) (rate(postgresql_database_reading_usage{connection_name=~\"$conn\", stat=\"tup_fetched\"}[$__rate_interval]))",
           "hide": false,
+          "interval": "",
           "legendFormat": "{{connection_name}}",
           "range": true,
-          "refId": "B"
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "avg (sum by (connection_name) (rate(postgresql_database_reading_usage{connection_name=~\"$conn\", stat=\"tup_fetched\"}[$__rate_interval])))",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "Avg",
+          "range": true,
+          "refId": "C"
         }
       ],
       "title": "Fetched",
@@ -719,6 +867,7 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Number of live rows fetched by sequential scans and index entries returned by index scans in this database.  See `pg_stat_database`\n\nTable `t` with 1000 rows: \\\n`SELECT count(*) FROM t;`\n\nFetched: 1 \\\nReturned: 1000",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -765,7 +914,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -773,12 +923,14 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 17
+        "y": 14
       },
       "id": 21,
       "options": {
         "legend": {
           "calcs": [
+            "min",
+            "max",
             "mean"
           ],
           "displayMode": "table",
@@ -811,6 +963,7 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Number of rows inserted by queries in this database. See `pg_stat_database`",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -857,7 +1010,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -865,12 +1019,14 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 22
+        "y": 19
       },
       "id": 10,
       "options": {
         "legend": {
           "calcs": [
+            "min",
+            "max",
             "mean"
           ],
           "displayMode": "table",
@@ -902,6 +1058,7 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Number of rows updated by queries in this database. See `pg_stat_database`",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -948,7 +1105,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -956,12 +1114,14 @@
         "h": 5,
         "w": 8,
         "x": 8,
-        "y": 22
+        "y": 19
       },
       "id": 23,
       "options": {
         "legend": {
           "calcs": [
+            "min",
+            "max",
             "mean"
           ],
           "displayMode": "table",
@@ -993,6 +1153,7 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Number of rows deleted by queries in this database. See `pg_stat_database`",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1039,7 +1200,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -1047,12 +1209,14 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 22
+        "y": 19
       },
       "id": 22,
       "options": {
         "legend": {
           "calcs": [
+            "min",
+            "max",
             "mean"
           ],
           "displayMode": "table",
@@ -1084,6 +1248,7 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Disc space used by the database. See `pg_database_size`\n\nIt may diverge over time cause some data is not replicated to other nodes",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1151,7 +1316,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 24
       },
       "id": 12,
       "options": {
@@ -1189,11 +1354,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 30
       },
       "id": 14,
       "panels": [],
-      "title": "Backends",
+      "title": "Connection details",
       "type": "row"
     },
     {
@@ -1255,12 +1420,14 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 34
+        "y": 31
       },
       "id": 16,
       "options": {
         "legend": {
           "calcs": [
+            "min",
+            "max",
             "mean"
           ],
           "displayMode": "table",
@@ -1346,12 +1513,14 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 34
+        "y": 31
       },
       "id": 18,
       "options": {
         "legend": {
           "calcs": [
+            "min",
+            "max",
             "mean"
           ],
           "displayMode": "table",
@@ -1384,7 +1553,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 37
       },
       "id": 27,
       "panels": [],
@@ -1450,7 +1619,7 @@
         "h": 8,
         "w": 10,
         "x": 0,
-        "y": 41
+        "y": 38
       },
       "id": 25,
       "options": {
@@ -1544,7 +1713,7 @@
         "h": 8,
         "w": 7,
         "x": 10,
-        "y": 41
+        "y": 38
       },
       "id": 28,
       "options": {
@@ -1638,7 +1807,7 @@
         "h": 8,
         "w": 7,
         "x": 17,
-        "y": 41
+        "y": 38
       },
       "id": 29,
       "options": {
@@ -1699,7 +1868,7 @@
         "definition": "label_values(postgresql_up, connection_name)",
         "hide": 0,
         "includeAll": true,
-        "label": "Conn",
+        "label": "Connection",
         "multi": true,
         "name": "conn",
         "options": [],
@@ -1740,8 +1909,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Nodes",
+  "title": "Instances Overview",
   "uid": "PWLW0WmVz",
-  "version": 16,
+  "version": 5,
   "weekStart": ""
 }
