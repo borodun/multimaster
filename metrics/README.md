@@ -66,4 +66,4 @@ kubectl apply -f k8s/mtm-metrics-pod-monitor.yaml -n mtm
 For additional configuration
 see [PodMonitor docs](https://docs.openshift.com/container-platform/4.11/rest_api/monitoring_apis/podmonitor-monitoring-coreos-com-v1.html)
 
-Open Grafana in browser and import [dashboard](grafana/nodes.json)
+Open Grafana in browser and import [dashboards](grafana/)
