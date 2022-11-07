@@ -94,5 +94,5 @@ k rollout restart deployment mtm-metrics-deployment -n mtm
 ## Grafana dashboard
 
 In Grafana GUI you need to isntall plugin **Statusmap** by _flant_.
-Import [dashboard](../../metrics/grafana/nodes.json)
+Import [dashboards](../../metrics/grafana/)
 

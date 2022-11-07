@@ -6,3 +6,4 @@
 /demo/*/backup
 *.deb
 mtm-joiner
+.idea
