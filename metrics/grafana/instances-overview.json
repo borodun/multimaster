@@ -1366,6 +1366,7 @@
         "type": "prometheus",
         "uid": "${ds_prometheus}"
       },
+      "description": "Most of multimaster processes have null state",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1446,7 +1447,7 @@
           },
           "editorMode": "code",
           "expr": "sum by (state) (postgresql_backends_by_state_total{connection_name=~\"$conn\"})",
-          "legendFormat": "{{connection_name}}",
+          "legendFormat": "{{state}}",
           "range": true,
           "refId": "A"
         }
@@ -1611,7 +1612,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -1705,7 +1707,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -1799,7 +1802,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -1911,6 +1915,6 @@
   "timezone": "",
   "title": "Instances Overview",
   "uid": "PWLW0WmVz",
-  "version": 5,
+  "version": 6,
   "weekStart": ""
 }
