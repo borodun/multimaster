@@ -6,6 +6,7 @@ import (
 	"backup/internal/utils"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 type MtmRemoveNode struct {
@@ -46,4 +47,56 @@ func (m *MtmRemoveNode) mtmRemoveNode(id string) {
 		fmt.Printf("Cannot drop node: %s\n", err.Error())
 		log.WithError(err).Fatal("cannot drop node")
 	}
+
+	err = m.dropCleanUp(id)
+	if err != nil {
+		fmt.Printf("Error with cleaning up after drop: %s\n", err.Error())
+		log.WithError(err).Fatal("clean up error")
+	}
+}
+
+func (m *MtmRemoveNode) GetMtmNodes() []*connection.DB {
+	var nodes []*connection.DB
+
+	for _, node := range m.Connections {
+		db := node.DB
+		println("Checking status of", db.GetName())
+		if stat := db.MtmStatus(); stat == "online" && db.GetName() != m.removeDb.GetName() {
+			nodes = append(nodes, node.DB)
+		}
+	}
+
+	return nodes
+}
+
+func (m *MtmRemoveNode) dropCleanUp(id string) error {
+	nodes := m.GetMtmNodes()
+
+	println("Got nodes for clean up:")
+	for _, node := range nodes {
+		print(node.GetName(), " ")
+	}
+	println("")
+
+	initDoneQuery := fmt.Sprintf("DELETE FROM mtm.nodes_init_done WHERE id = %s", id)
+
+	for _, node := range nodes {
+		var info []string
+		println("Cleaning init done for", node.GetName())
+		err := node.Query(initDoneQuery, &info)
+		if err != nil {
+			return err
+		}
+	}
+
+	time.Sleep(time.Duration(2) * time.Second)
+	println("Cleaning syncpoints")
+	syncpointsQuery := fmt.Sprintf("DELETE FROM mtm.syncpoints WHERE receiver_node_id = %s OR origin_node_id = %s", id, id)
+	var info []string
+	err := m.initDb.Query(syncpointsQuery, &info)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

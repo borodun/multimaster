@@ -5,7 +5,7 @@ toolbox:
   # You might want to create password file, see: https://www.postgresql.org/docs/14/libpq-pgpass.html
   connections:
     - name: node0
-      pgurl: postgresql://user:1234@node0:5432/mydb?sslmode=disable
+      url: postgresql://user:1234@node0:5432/mydb?sslmode=disable
       ssh:
         user: user
         host: node0
@@ -13,7 +13,7 @@ toolbox:
         # Default: $HOME/.ssh/id_rsa
         key: /path/to/node/key
     - name: node1
-      pgurl: postgresql://user:1234@node1:5432/mydb?sslmode=disable
+      url: postgresql://user:1234@node1:5432/mydb?sslmode=disable
       ssh:
         user: user
         host: node1

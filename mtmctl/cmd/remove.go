@@ -44,16 +44,26 @@ func init() {
 func removeConnConf(node string) []connection.Conf {
 	connConfs := make([]connection.Conf, 0)
 
-	nodeConf := connection.Conf{
-		ConnName:   node,
-		ConnectDb:  true,
-		DbRequired: true,
+	for _, node := range cfg.Toolbox.Connections {
+		nodeConf := connection.Conf{
+			ConnName:  node.Name,
+			ConnectDb: true,
+			//DbRequired: true,
+		}
+
+		connConfs = append(connConfs, nodeConf)
 	}
-	initConf := connection.Conf{
-		ConnName:   initNode,
-		ConnectDb:  true,
-		DbRequired: true,
-	}
-	connConfs = append(connConfs, nodeConf, initConf)
+
+	//nodeConf := connection.Conf{
+	//	ConnName:   node,
+	//	ConnectDb:  true,
+	//	DbRequired: true,
+	//}
+	//initConf := connection.Conf{
+	//	ConnName:   initNode,
+	//	ConnectDb:  true,
+	//	DbRequired: true,
+	//}
+	//connConfs = append(connConfs, nodeConf, initConf)
 	return connConfs
 }
