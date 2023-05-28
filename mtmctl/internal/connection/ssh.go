@@ -2,9 +2,12 @@ package connection
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/k0sproject/rig"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 type SSH struct {
@@ -65,4 +68,90 @@ func (s *SSH) RemovePGDATA() {
 			WithField("out", out).
 			WithError(err).Error("remove pgdata error")
 	}
+}
+
+func (s *SSH) Initdb() {
+	out, err := s.ExecOutputf("%s/initdb -D %s", s.pgbin, s.pgdata)
+	if err != nil {
+		log.WithField("conn", s.name).
+			WithField("out", out).
+			WithError(err).Error("initdb error")
+	}
+}
+
+func (s *SSH) AddPostgresqlConfLine(line string) {
+	out, err := s.ExecOutputf("echo %s >> %s/postgresql.conf", line, s.pgdata)
+	if err != nil {
+		log.WithField("conn", s.name).
+			WithField("out", out).
+			WithField("line", line).
+			WithError(err).Error("error while editing postgresql.conf")
+	}
+}
+
+func (s *SSH) AddPgHBAConfLine(line string) {
+	out, err := s.ExecOutputf("echo %s >> %s/pg_hba.conf", line, s.pgdata)
+	if err != nil {
+		log.WithField("conn", s.name).
+			WithField("out", out).
+			WithField("line", line).
+			WithError(err).Error("error while editing pg_hba.conf")
+	}
+}
+
+func (s *SSH) RunPSQL(query string) string {
+	out, err := s.ExecOutputf("%s/psql -d postgres -p 5432 -Atc \"%s\"", s.pgbin, query)
+	if err != nil {
+		log.WithField("conn", s.name).
+			WithField("out", out).
+			WithField("query", query).
+			WithError(err).Error("psql error")
+	}
+
+	return out
+}
+
+func (s *SSH) RunPSQL_MTM(query string) string {
+	out, err := s.ExecOutputf("PGPASSWORD=1234 %s/psql -d mydb -U mtmuser -p 5432 -Atc \"%s\"", s.pgbin, query)
+	if err != nil {
+		log.WithField("conn", s.name).
+			WithField("out", out).
+			WithField("query", query).
+			WithError(err).Error("mtm psql error")
+	}
+
+	return out
+}
+
+func (s *SSH) WaitForCluster(nodeCount int) bool {
+	query := "SELECT count(*) FROM mtm.nodes() WHERE enabled = 't' AND connected = 't'"
+
+	tries, limit := 0, 60
+	good := false
+
+	for {
+		fmt.Printf(".")
+
+		out, _ := s.ExecOutputf("PGPASSWORD=1234 %s/psql -d mydb -U mtmuser -p 5432 -Atc \"%s\"", s.pgbin, query)
+		count, _ := strconv.Atoi(out)
+		if count == nodeCount {
+			good = true
+			break
+		}
+
+		if tries > limit {
+			break
+		}
+		tries++
+
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	if good {
+		fmt.Println("ok")
+	} else {
+		fmt.Println("fail")
+	}
+
+	return good
 }

@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"backup/internal/connection"
 	"fmt"
+	"mtmctl/internal/connection"
+
 	log "github.com/sirupsen/logrus"
 )
 

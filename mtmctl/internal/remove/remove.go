@@ -1,12 +1,13 @@
 package remove
 
 import (
-	"backup/internal/config"
-	"backup/internal/connection"
-	"backup/internal/utils"
 	"fmt"
-	log "github.com/sirupsen/logrus"
+	"mtmctl/internal/config"
+	"mtmctl/internal/connection"
+	"mtmctl/internal/utils"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type MtmRemoveNode struct {

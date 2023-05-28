@@ -1,9 +1,9 @@
 package status
 
 import (
-	"backup/internal/config"
-	"backup/internal/connection"
 	"fmt"
+	"mtmctl/internal/config"
+	"mtmctl/internal/connection"
 	"sort"
 )
 

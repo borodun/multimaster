@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
-	"github.com/lib/pq"
-	log "github.com/sirupsen/logrus"
-	"github.com/tg/pgpass"
 	nurl "net/url"
 	"sort"
 	"strings"
+
+	"github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
+	"github.com/tg/pgpass"
 )
 
 type Bastion struct {

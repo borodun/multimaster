@@ -1,4 +1,4 @@
-module backup
+module mtmctl
 
 go 1.19
 

@@ -19,3 +19,11 @@ func (c *Connections) GetConnNames() []string {
 	sort.Strings(conns)
 	return conns
 }
+
+func (c *Connections) GetFirstConnection() *Connection {
+	for _, connection := range *c {
+		return &connection
+	}
+
+	return nil
+}

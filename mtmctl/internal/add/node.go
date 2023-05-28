@@ -1,13 +1,14 @@
 package add
 
 import (
-	"backup/internal/config"
-	"backup/internal/connection"
-	"backup/internal/utils"
 	"fmt"
-	log "github.com/sirupsen/logrus"
+	"mtmctl/internal/config"
+	"mtmctl/internal/connection"
+	"mtmctl/internal/utils"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type MtmAddNode struct {
@@ -35,7 +36,7 @@ func (m *MtmAddNode) Run() {
 
 	log.RegisterExitHandler(func() {
 		m.mtmDropNodeByID(id)
-		fmt.Println("Something went wrong, add --verbose flag to see logs")
+		fmt.Println("Something went wrong, add --verbose flag to see detailed logs")
 	})
 
 	m.dstSSH.PgCtlStop()

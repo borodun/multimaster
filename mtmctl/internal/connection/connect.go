@@ -1,14 +1,15 @@
 package connection
 
 import (
-	"backup/internal/config"
 	"database/sql"
 	"fmt"
+	"mtmctl/internal/config"
+	nurl "net/url"
+
 	"github.com/k0sproject/rig"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/tg/pgpass"
-	nurl "net/url"
 )
 
 type Conf struct {

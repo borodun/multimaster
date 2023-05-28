@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"backup/internal/config"
 	"fmt"
+	"mtmctl/internal/config"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

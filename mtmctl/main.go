@@ -1,7 +1,7 @@
 package main
 
 import (
-	"backup/cmd"
+	"mtmctl/cmd"
 )
 
 func main() {
