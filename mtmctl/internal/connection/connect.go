@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mtmctl/internal/config"
 	nurl "net/url"
+	"sync"
 
 	"github.com/k0sproject/rig"
 	_ "github.com/lib/pq"
@@ -34,40 +35,51 @@ func Connect(cfg config.Config, connConf []Conf) Connections {
 
 	connections := make(Connections)
 
+	var wg sync.WaitGroup
+
 	for _, conf := range connConf {
-		conn := cfg.GetConn(conf.ConnName)
-
-		connLog := log.WithField("conn", conn.Name)
-
-		ssh, err := connectToHost(conn.Ssh, conf.ConnectSsh)
-		if err != nil {
-			if conf.SshRequired {
-				connLog.WithError(err).Fatal("cannot connect to host, but it is required")
-			}
-			connLog.WithError(err).Warn("cannot connect to host, skipping")
-		} else if conf.ConnectSsh {
-			ssh.name = conn.Name
-			ssh.pgdata = cfg.GetPGDATA()
-			ssh.pgbin = cfg.GetPGBIN()
-		}
-
-		db, err := connectToPostgres(conn.URL, conf.ConnectDb)
-		if err != nil {
-			if conf.DbRequired {
-				connLog.WithError(err).Fatal("cannot connect to database, but it is required")
-			}
-			connLog.WithError(err).Warn("cannot connect to database, skipping")
-		}
-
-		connections[conn.Name] = Connection{
-			SSH: ssh,
-			DB:  NewDB(db, conn.Name),
-		}
-
-		connLog.Info("connected")
+		wg.Add(1)
+		go connectNode(conf, cfg, connections, &wg)
 	}
 
+	wg.Wait()
+
 	return connections
+}
+
+func connectNode(conf Conf, cfg config.Config, connections Connections, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	conn := cfg.GetConn(conf.ConnName)
+
+	connLog := log.WithField("conn", conn.Name)
+
+	ssh, err := connectToHost(conn.Ssh, conf.ConnectSsh)
+	if err != nil {
+		if conf.SshRequired {
+			connLog.WithError(err).Fatal("cannot connect to host, but it is required")
+		}
+		connLog.WithError(err).Warn("cannot connect to host, skipping")
+	} else if conf.ConnectSsh {
+		ssh.name = conn.Name
+		ssh.pgdata = cfg.GetPGDATA()
+		ssh.pgbin = cfg.GetPGBIN()
+	}
+
+	db, err := connectToPostgres(conn.URL, conf.ConnectDb)
+	if err != nil {
+		if conf.DbRequired {
+			connLog.WithError(err).Fatal("cannot connect to database, but it is required")
+		}
+		connLog.WithError(err).Warn("cannot connect to database, skipping")
+	}
+
+	connections[conn.Name] = Connection{
+		SSH: ssh,
+		DB:  NewDB(db, conn.Name),
+	}
+
+	connLog.Info("connected")
 }
 
 func arrayContains(arr []string, name string) bool {
