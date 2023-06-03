@@ -55,16 +55,5 @@ func removeConnConf(node string) []connection.Conf {
 		connConfs = append(connConfs, nodeConf)
 	}
 
-	//nodeConf := connection.Conf{
-	//	ConnName:   node,
-	//	ConnectDb:  true,
-	//	DbRequired: true,
-	//}
-	//initConf := connection.Conf{
-	//	ConnName:   initNode,
-	//	ConnectDb:  true,
-	//	DbRequired: true,
-	//}
-	//connConfs = append(connConfs, nodeConf, initConf)
 	return connConfs
 }

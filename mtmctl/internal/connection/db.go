@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+	log "github.com/sirupsen/logrus"
 )
 
 type DB struct {
@@ -174,7 +175,7 @@ func (d *DB) MtmStatus() string {
 		}
 	}
 
-	return fmt.Sprintf("unkown status: %s", status[0].Status)
+	return ""
 }
 
 func (d *DB) GetMtmNodeID() string {
@@ -185,4 +186,23 @@ func (d *DB) GetMtmNodeID() string {
 			WithField("conn", d.name).Fatal("couldn't get node id in mtm")
 	}
 	return status[0].Id
+}
+
+type NodesTup struct {
+	Id       string `db:"id"`
+	Conninfo string `db:"conninfo"`
+}
+
+const mtmNodesQuery = `
+	SELECt id, conninfo FROM mtm.nodes() WHERE enabled = 't' and connected = 't'
+`
+
+func (d *DB) GetMtmNodes() []NodesTup {
+	var nodes []NodesTup
+	err := d.Query(mtmNodesQuery, &nodes)
+	if err != nil {
+		log.WithError(err).
+			WithField("conn", d.name).Fatal("couldn't get nodes table id in mtm")
+	}
+	return nodes
 }

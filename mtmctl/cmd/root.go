@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"mtmctl/internal/config"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -12,6 +13,7 @@ import (
 var (
 	configPath string
 	verbose    bool
+	debug      bool
 	cfg        config.Config
 
 	rootCmd = &cobra.Command{
@@ -29,10 +31,13 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to config file (default is ./config.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "turn on verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "turn on debug output")
 }
 
 func start() {
 	if verbose {
+		log.SetLevel(log.WarnLevel)
+	} else if debug {
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.SetLevel(log.FatalLevel)
@@ -45,7 +50,11 @@ func initConfig() {
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
 	} else {
-		viper.AddConfigPath(".")
+		dirname, err := os.UserHomeDir()
+		if err == nil {
+			viper.AddConfigPath(dirname + "/.mtm")
+		}
+
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("config")
 	}
