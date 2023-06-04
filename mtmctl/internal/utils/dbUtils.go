@@ -26,8 +26,8 @@ func CheckDatabases(dbs ...*connection.DB) {
 	}
 }
 
-func GetClusterNodes(conns connection.Connections, nodeName string) connection.Connections {
-	nodeDB := conns[nodeName].DB
+func GetClusterNodes(conns connection.Connections, name string) connection.Connections {
+	nodeDB := conns[name].DB
 	nodeId := nodeDB.GetMtmNodeID()
 	nodeConnInfo := ""
 	clusterNodes := nodeDB.GetMtmNodes()
@@ -39,6 +39,7 @@ func GetClusterNodes(conns connection.Connections, nodeName string) connection.C
 	}
 
 	nodes := make(connection.Connections)
+	nodes[name] = conns[name]
 
 	for nodeName, node := range conns {
 		db := node.DB
@@ -46,9 +47,15 @@ func GetClusterNodes(conns connection.Connections, nodeName string) connection.C
 			continue
 		}
 
+		id := db.GetMtmNodeID()
+		if id == nodeId {
+			continue
+		}
+
 		nodesTups := db.GetMtmNodes()
 		for _, nodeTup := range nodesTups {
 			if nodeTup.Id == nodeId && nodeTup.Conninfo == nodeConnInfo {
+				fmt.Printf("Discovered node '%s' in the same cluster as node '%s'\n", nodeName, name)
 				nodes[nodeName] = node
 			}
 		}

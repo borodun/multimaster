@@ -123,6 +123,18 @@ func (s *SSH) RunPSQL_MTM(query string) string {
 	return out
 }
 
+func (s *SSH) RunPSQL_MTM_Full(query string) string {
+	out, err := s.ExecOutputf("PGPASSWORD=1234 %s/psql -d mydb -U mtmuser -p 5432 -c \"%s\"", s.pgbin, query)
+	if err != nil {
+		log.WithField("conn", s.name).
+			WithField("out", out).
+			WithField("query", query).
+			WithError(err).Error("mtm psql error")
+	}
+
+	return out
+}
+
 func (s *SSH) WaitForCluster(nodeCount int) bool {
 	query := "SELECT count(*) FROM mtm.nodes() WHERE enabled = 't' AND connected = 't'"
 

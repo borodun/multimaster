@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mtmctl/internal/config"
 	nurl "net/url"
+	"strings"
 	"sync"
 
 	"github.com/k0sproject/rig"
@@ -34,6 +35,8 @@ func Connect(cfg config.Config, connConf []Conf) Connections {
 			log.Fatalf("config doesn't contain connection for '%s'", conf.ConnName)
 		}
 	}
+
+	fmt.Printf("Connecting to nodes: %s\n", strings.Join(connNames, ", "))
 
 	connections := make(Connections)
 

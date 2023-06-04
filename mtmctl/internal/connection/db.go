@@ -183,7 +183,8 @@ func (d *DB) GetMtmNodeID() string {
 	err := d.Query(mtmNodeStatusQuery, &status)
 	if err != nil {
 		log.WithError(err).
-			WithField("conn", d.name).Fatal("couldn't get node id in mtm")
+			WithField("conn", d.name).Error("couldn't get node id in mtm")
+		return ""
 	}
 	return status[0].Id
 }

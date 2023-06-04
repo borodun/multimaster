@@ -31,7 +31,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "path to config file (default is ./config.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "turn on verbose output")
-	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "turn on debug output")
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "turn on debug output")
 }
 
 func start() {
