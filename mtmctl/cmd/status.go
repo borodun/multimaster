@@ -6,7 +6,7 @@ import (
 
 var (
 	statusCmd = &cobra.Command{
-		Use:   "status [connection_names]",
+		Use:   "status [node | cluster]",
 		Short: "Get whole cluster or specific node status",
 	}
 )
