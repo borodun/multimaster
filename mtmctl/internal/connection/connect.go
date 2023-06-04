@@ -21,6 +21,8 @@ type Conf struct {
 	SshRequired bool
 }
 
+var confMapMutex = sync.Mutex{}
+
 func Connect(cfg config.Config, connConf []Conf) Connections {
 	logger := log.New()
 	logger.SetLevel(log.GetLevel())
@@ -74,10 +76,12 @@ func connectNode(conf Conf, cfg config.Config, connections Connections, wg *sync
 		connLog.WithError(err).Warn("cannot connect to database, skipping")
 	}
 
+	confMapMutex.Lock()
 	connections[conn.Name] = Connection{
 		SSH: ssh,
 		DB:  NewDB(db, conn.Name),
 	}
+	confMapMutex.Unlock()
 
 	connLog.Info("connected")
 }

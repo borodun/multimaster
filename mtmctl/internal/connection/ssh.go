@@ -155,3 +155,15 @@ func (s *SSH) WaitForCluster(nodeCount int) bool {
 
 	return good
 }
+
+func (s *SSH) ExecInShell(toExec string) string {
+	out, err := s.ExecOutputf("sh -c \"%s\"", toExec)
+	if err != nil {
+		log.WithField("conn", s.name).
+			WithField("out", out).
+			WithField("cmd", toExec).
+			WithError(err).Error("executing cmd in shell failed")
+	}
+
+	return out
+}

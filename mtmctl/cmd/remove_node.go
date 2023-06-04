@@ -26,7 +26,7 @@ var (
 
 			mtmRemoveNode := remove.MtmRemoveNode{
 				Cfg:         cfg,
-				Connections: connection.Connect(cfg, removeConnConf(removeNode)),
+				Connections: connection.Connect(cfg, removeConnConf()),
 				InitNode:    initNode,
 				RemoveNode:  removeNode,
 			}
@@ -42,14 +42,13 @@ func init() {
 	removeNodeCmd.Flags().StringVarP(&initNode, "init-node", "i", "", "specify node that will initiate removal")
 }
 
-func removeConnConf(node string) []connection.Conf {
+func removeConnConf() []connection.Conf {
 	connConfs := make([]connection.Conf, 0)
 
 	for _, node := range cfg.Toolbox.Connections {
 		nodeConf := connection.Conf{
 			ConnName:  node.Name,
 			ConnectDb: true,
-			//DbRequired: true,
 		}
 
 		connConfs = append(connConfs, nodeConf)

@@ -1,23 +1,26 @@
 package cmd
 
 import (
+	"fmt"
 	"mtmctl/internal/connection"
 	"mtmctl/internal/status"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
 var (
 	statusNodeCmd = &cobra.Command{
-		Use:   "node [connection_names]",
+		Use:   "node [connection_names,...]",
 		Short: "Get status nodes",
 		Run: func(cmd *cobra.Command, args []string) {
-			mtmStatus := &status.MtmStatus{
+			mtmNodeStatus := &status.MtmStatus{
 				Cfg:         cfg,
 				Connections: connection.Connect(cfg, getConnConf(args)),
+				Node:        "",
 			}
 
-			mtmStatus.Run()
+			mtmNodeStatus.Run()
 		},
 	}
 )
@@ -27,8 +30,11 @@ func init() {
 }
 
 func getConnConf(args []string) []connection.Conf {
-	if len(args) != 0 {
-		return fromArgs(args)
+	if len(args) == 1 {
+		return fromArgs(strings.Split(args[0], ","))
+	} else if len(args) > 1 {
+		fmt.Println("Warning: using first argument only")
+		return fromArgs(strings.Split(args[0], ","))
 	} else {
 		return fromConfig()
 	}
@@ -39,11 +45,9 @@ func fromArgs(args []string) []connection.Conf {
 
 	for _, arg := range args {
 		conf := connection.Conf{
-			ConnName:    arg,
-			ConnectDb:   true,
-			ConnectSsh:  false,
-			DbRequired:  true,
-			SshRequired: false,
+			ConnName:   arg,
+			ConnectDb:  true,
+			ConnectSsh: true,
 		}
 		connConfs = append(connConfs, conf)
 	}
@@ -56,11 +60,9 @@ func fromConfig() []connection.Conf {
 
 	for _, conn := range cfg.Toolbox.Connections {
 		conf := connection.Conf{
-			ConnName:    conn.Name,
-			ConnectDb:   true,
-			ConnectSsh:  false,
-			DbRequired:  false,
-			SshRequired: false,
+			ConnName:   conn.Name,
+			ConnectDb:  true,
+			ConnectSsh: true,
 		}
 		connConfs = append(connConfs, conf)
 	}
